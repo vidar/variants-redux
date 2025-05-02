@@ -1,7 +1,20 @@
+
 import React, { useState } from 'react';
 import CurlVisualizer from '@/components/CurlVisualizer';
 import ApiForm from '@/components/ApiForm';
 import JsonViewer from '@/components/JsonViewer';
+
+// Define the response data type
+interface ResponseData {
+  data?: any;
+  meta?: {
+    total: number;
+    page: number;
+    per_page: number;
+    total_pages: number;
+  };
+  message?: string;
+}
 
 const Index = () => {
   const [requestConfig, setRequestConfig] = useState({
@@ -11,14 +24,22 @@ const Index = () => {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer YOUR_TOKEN_HERE'
     },
-    body: undefined
+    body: undefined,
+    cdaHostname: 'eu-cdn.contentstack.com',
+    cmaHostname: 'eu-api.contentstack.com',
+    apiKey: '',
+    managementToken: '',
+    deliveryToken: '',
+    contentType: '',
+    entryUid: '',
+    locale: 'en-us'
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   
-  // Demo response data
-  const [responseData, setResponseData] = useState({
+  // Demo response data with proper typing
+  const [responseData, setResponseData] = useState<ResponseData>({
     data: [
       {
         id: 1,
