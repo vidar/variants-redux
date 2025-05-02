@@ -47,30 +47,24 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       let variantId: string | undefined;
       let style: React.CSSProperties = {};
       
-      // Check if this path is in applied variants
-      for (const variant in appliedVariants) {
-        // Check if the variant value is an array before calling .some()
-        if (Array.isArray(appliedVariants[variant])) {
-          if (appliedVariants[variant].some((fieldPath: string) => fieldPath === path || path.endsWith(`.${fieldPath}`))) {
-            variantId = variant;
+      // Check if this path is in applied variants (key is field path, value is variant ID)
+      if (appliedVariants && path && appliedVariants[path]) {
+        variantId = appliedVariants[path];
+        style = { 
+          color: getVariantColor(variantId),
+          fontWeight: 'bold'
+        };
+      } else {
+        // Check if this is part of a deeper path
+        for (const fieldPath in appliedVariants) {
+          if (fieldPath.startsWith(path + '.') || path.endsWith('.' + fieldPath)) {
+            variantId = appliedVariants[fieldPath];
             style = { 
-              color: getVariantColor(variant),
+              color: getVariantColor(variantId),
               fontWeight: 'bold'
             };
             break;
           }
-        } else if (typeof appliedVariants[variant] === 'string' && 
-                  (appliedVariants[variant] === path || path.endsWith(`.${appliedVariants[variant]}`))) {
-          // Handle case where the variant points directly to a string path
-          variantId = variant;
-          style = { 
-            color: getVariantColor(variant),
-            fontWeight: 'bold'
-          };
-          break;
-        } else if (typeof appliedVariants[variant] === 'object' && appliedVariants[variant] !== null) {
-          // Handle other possible structures
-          console.log('Variant structure:', variant, appliedVariants[variant]);
         }
       }
       
