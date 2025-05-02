@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,17 +22,20 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     locale, setLocale
   } = useFormFields();
   
-  // Create a callback function to handle API call when variants change
-  const triggerApiCall = useCallback((selectedVariants: string[]) => {
-    // Only trigger if we have the required fields
-    if (!apiKey || !contentType || !entryUid || !cdaHostname) {
-      console.log("Not triggering API call: missing required fields");
-      return;
-    }
+  const {
+    variantGroups,
+    selectedVariants,
+    fetchingVariants,
+    fetchVariantGroups,
+    handleVariantSelection
+  } = useVariants(apiKey, managementToken, cmaHostname);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    console.log("Automatically triggering API call with variants:", selectedVariants);
+    console.log("Selected variants before submission:", selectedVariants);
     
-    // Construct the API URL following the specified pattern
+    // Construct the API URL following the specified pattern with the added include_applied_variants=true parameter
     const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3&include_applied_variants=true`;
     
     // Prepare headers
@@ -68,20 +71,6 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
       entryUid,
       locale
     });
-  }, [apiKey, contentType, entryUid, cdaHostname, deliveryToken, cmaHostname, locale, managementToken, onSubmit]);
-  
-  const {
-    variantGroups,
-    selectedVariants,
-    fetchingVariants,
-    fetchVariantGroups,
-    handleVariantSelection
-  } = useVariants(apiKey, managementToken, cmaHostname, triggerApiCall);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Manual form submission with variants:", selectedVariants);
-    triggerApiCall(selectedVariants);
   };
 
   return (
