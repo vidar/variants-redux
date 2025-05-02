@@ -67,9 +67,9 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
         });
         return;
       }
-      setSelectedVariants([...selectedVariants, variantId]);
+      setSelectedVariants(prev => [...prev, variantId]);
     } else {
-      setSelectedVariants(selectedVariants.filter(id => id !== variantId));
+      setSelectedVariants(prev => prev.filter(id => id !== variantId));
     }
   };
 
