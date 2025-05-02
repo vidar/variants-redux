@@ -49,13 +49,28 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       
       // Check if this path is in applied variants
       for (const variant in appliedVariants) {
-        if (appliedVariants[variant].some((fieldPath: string) => fieldPath === path || path.endsWith(`.${fieldPath}`))) {
+        // Check if the variant value is an array before calling .some()
+        if (Array.isArray(appliedVariants[variant])) {
+          if (appliedVariants[variant].some((fieldPath: string) => fieldPath === path || path.endsWith(`.${fieldPath}`))) {
+            variantId = variant;
+            style = { 
+              color: getVariantColor(variant),
+              fontWeight: 'bold'
+            };
+            break;
+          }
+        } else if (typeof appliedVariants[variant] === 'string' && 
+                  (appliedVariants[variant] === path || path.endsWith(`.${appliedVariants[variant]}`))) {
+          // Handle case where the variant points directly to a string path
           variantId = variant;
           style = { 
             color: getVariantColor(variant),
             fontWeight: 'bold'
           };
           break;
+        } else if (typeof appliedVariants[variant] === 'object' && appliedVariants[variant] !== null) {
+          // Handle other possible structures
+          console.log('Variant structure:', variant, appliedVariants[variant]);
         }
       }
       
