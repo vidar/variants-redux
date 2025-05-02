@@ -23,10 +23,10 @@ interface ResponseData {
 const Index = () => {
   const [requestConfig, setRequestConfig] = useState({
     method: 'GET',
-    url: 'https://api.example.com/users',
+    url: '',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer YOUR_TOKEN_HERE'
+      'Authorization': ''
     },
     body: undefined,
     cdaHostname: 'eu-cdn.contentstack.com',
