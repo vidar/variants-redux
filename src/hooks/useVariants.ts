@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { VariantGroup } from '@/types/api';
 import { useToast } from "@/hooks/use-toast";
 
@@ -56,10 +56,14 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
     }
   };
   
-  const handleVariantSelection = useCallback((variantId: string) => {
-    setSelectedVariants(prevSelected => {
+  const handleVariantSelection = (variantId: string) => {
+    console.log('Selecting variant:', variantId);
+    console.log('Current selected:', selectedVariants);
+    
+    setSelectedVariants((prevSelected) => {
       // If already selected, remove it
       if (prevSelected.includes(variantId)) {
+        console.log('Removing variant:', variantId);
         return prevSelected.filter(id => id !== variantId);
       }
       
@@ -74,9 +78,10 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
       }
       
       // Otherwise, add the new variant
+      console.log('Adding variant:', variantId);
       return [...prevSelected, variantId];
     });
-  }, [toast]);
+  };
 
   return {
     variantGroups,
