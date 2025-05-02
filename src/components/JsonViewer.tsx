@@ -61,12 +61,17 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                       <div 
                         key={i} 
                         {...getLineProps({ line })} 
-                        className={`hover:bg-sky-100 ${shouldHighlight ? 'bg-orange-100' : ''}`}
+                        className={`hover:bg-sky-100 ${shouldHighlight ? 'bg-orange-100' : ''} flex`}
                         style={shouldHighlight ? { backgroundColor: '#FEC6A1' } : {}}
                       >
-                        {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
-                        ))}
+                        <div className="flex-grow">
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                        {shouldHighlight && (
+                          <span className="ml-2 font-bold text-orange-600 whitespace-nowrap">woohoo</span>
+                        )}
                       </div>
                     );
                   })}
