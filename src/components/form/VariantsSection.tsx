@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { VariantGroup } from "@/types/api";
 
 interface VariantsSectionProps {
@@ -63,20 +62,16 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
               <h4 className="text-sm font-medium">{group.name}</h4>
               <div className="grid grid-cols-2 gap-2">
                 {group.variants.map((variant) => (
-                  <div key={variant.id} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`variant-${variant.id}`}
-                      checked={selectedVariants.includes(variant.id)}
-                      onCheckedChange={(checked) => {
-                        handleVariantChange(variant.id, checked === true);
-                      }}
-                    />
-                    <Label 
-                      htmlFor={`variant-${variant.id}`}
-                      className="text-sm cursor-pointer"
-                    >
-                      {variant.name}
-                    </Label>
+                  <div 
+                    key={variant.id} 
+                    className={`py-2 px-3 border rounded-md cursor-pointer transition-colors ${
+                      selectedVariants.includes(variant.id) 
+                        ? 'bg-primary/10 border-primary' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    onClick={() => handleVariantChange(variant.id, !selectedVariants.includes(variant.id))}
+                  >
+                    <span className="text-sm">{variant.name}</span>
                   </div>
                 ))}
               </div>
