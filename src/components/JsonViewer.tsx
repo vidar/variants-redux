@@ -19,6 +19,11 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   // Format JSON as a string with proper indentation
   const formattedJson = data ? JSON.stringify(data, null, 2) : "";
 
+  // Check if a line contains "updated_at" key
+  const lineContainsUpdatedAt = (line: string) => {
+    return line.includes('"updated_at"');
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
@@ -48,13 +53,23 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
                 <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
-                  {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line })} className="hover:bg-sky-100">
-                      {line.map((token, key) => (
-                        <span key={key} {...getTokenProps({ token })} />
-                      ))}
-                    </div>
-                  ))}
+                  {tokens.map((line, i) => {
+                    const lineText = line.map(token => token.content).join('');
+                    const shouldHighlight = lineContainsUpdatedAt(lineText);
+                    
+                    return (
+                      <div 
+                        key={i} 
+                        {...getLineProps({ line })} 
+                        className={`hover:bg-sky-100 ${shouldHighlight ? 'bg-orange-100' : ''}`}
+                        style={shouldHighlight ? { backgroundColor: '#FEC6A1' } : {}}
+                      >
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token })} />
+                        ))}
+                      </div>
+                    );
+                  })}
                 </pre>
               )}
             </Highlight>
