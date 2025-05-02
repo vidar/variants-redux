@@ -57,14 +57,18 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
     }
   };
   
-  // Completely rebuilt variant selection logic
   const handleVariantSelection = (variantId: string) => {
-    console.log('Handling variant selection for:', variantId);
+    if (!variantId) {
+      console.error('Invalid variant ID provided');
+      return;
+    }
+
+    console.log(`Handling variant selection for: ${variantId}`);
     
     setSelectedVariants(prev => {
       // If already selected, remove it
       if (prev.includes(variantId)) {
-        console.log('Removing variant from selection:', variantId);
+        console.log(`Removing variant from selection: ${variantId}`);
         return prev.filter(id => id !== variantId);
       }
       
@@ -79,7 +83,7 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
       }
       
       // Add the new variant
-      console.log('Adding variant to selection:', variantId);
+      console.log(`Adding variant to selection: ${variantId}`);
       return [...prev, variantId];
     });
   };
