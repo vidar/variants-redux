@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import CurlVisualizer from '@/components/CurlVisualizer';
 import ApiForm from '@/components/ApiForm';
 import JsonViewer from '@/components/JsonViewer';
+import { ApiFormData } from '@/types/api';
 
 // Define the response data type
 interface ResponseData {
@@ -21,7 +22,7 @@ interface ResponseData {
 }
 
 const Index = () => {
-  const [requestConfig, setRequestConfig] = useState({
+  const [requestConfig, setRequestConfig] = useState<ApiFormData>({
     method: 'GET',
     url: '',
     headers: {
@@ -36,7 +37,8 @@ const Index = () => {
     deliveryToken: '',
     contentType: '',
     entryUid: '',
-    locale: 'en-us'
+    locale: 'en-us',
+    includeAll: true
   });
   
   const [selectedVariantDetails, setSelectedVariantDetails] = useState<{id: string, name: string, groupName?: string}[]>([]);
@@ -45,7 +47,7 @@ const Index = () => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [responseData, setResponseData] = useState<ResponseData>({});
 
-  const handleSubmit = (data: typeof requestConfig, variantDetails: {id: string, name: string, groupName?: string}[]) => {
+  const handleSubmit = (data: ApiFormData, variantDetails: {id: string, name: string, groupName?: string}[]) => {
     setRequestConfig(data);
     setSelectedVariantDetails(variantDetails);
     setIsLoading(true);

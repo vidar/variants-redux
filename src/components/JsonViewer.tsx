@@ -11,20 +11,32 @@ interface JsonViewerProps {
   error?: string;
 }
 
-// Function to get variant color similar to the one in CurlVisualizer
-const getVariantColor = (variantId: string, variantMap: Map<string, number>): { background: string, border: string } => {
-  const colors = [
-    { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" }, // blue
-    { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },   // green
-    { background: "rgba(168, 85, 247, 0.15)", border: "rgba(168, 85, 247, 0.5)" }, // purple
-    { background: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.5)" }, // amber
-    { background: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.5)" }, // pink
-    { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
-  ];
+// Define consistent colors for variants
+const variantColors = [
+  { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" }, // blue
+  { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },   // green
+  { background: "rgba(168, 85, 247, 0.15)", border: "rgba(168, 85, 247, 0.5)" }, // purple
+  { background: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.5)" }, // amber
+  { background: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.5)" }, // pink
+  { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
+];
+
+// Function to get variant color by hashing the variant ID
+const getVariantColor = (variantId: string): { background: string, border: string } => {
+  // Simple hash function to generate a consistent index for a variant ID
+  const hashCode = (str: string): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    // Make sure hash is always positive
+    return Math.abs(hash);
+  };
   
-  // Get consistent index for this variant ID
-  const index = variantMap.get(variantId) || 0;
-  return colors[index % colors.length];
+  const index = hashCode(variantId) % variantColors.length;
+  return variantColors[index];
 };
 
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
@@ -36,38 +48,39 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const formattedJson = data ? JSON.stringify(data, null, 2) : "";
   
   // Function to extract all variants from the JSON structure at any level
-  const extractVariants = (obj: any, result: Map<string, number> = new Map(), path: string = '', depth: number = 0): Map<string, number> => {
-    if (!obj || typeof obj !== 'object') return result;
+  const extractVariants = (obj: any): Set<string> => {
+    const variantIds = new Set<string>();
     
-    // If this object has _applied_variants, handle it
-    if (obj._applied_variants && typeof obj._applied_variants === 'object') {
-      Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
-        if (!result.has(variantId as string)) {
-          // Assign a unique index to each unique variant ID
-          result.set(variantId as string, result.size);
+    const processObject = (obj: any) => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // If this object has _applied_variants, extract the IDs
+      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
+        Object.values(obj._applied_variants).forEach(variantId => {
+          if (typeof variantId === 'string') {
+            variantIds.add(variantId);
+          }
+        });
+      }
+      
+      // Recursively process all nested objects
+      Object.values(obj).forEach(value => {
+        if (value && typeof value === 'object') {
+          processObject(value);
         }
       });
-    }
+    };
     
-    // Recursively process all nested objects
-    Object.entries(obj).forEach(([key, value]) => {
-      if (value && typeof value === 'object') {
-        extractVariants(value, result, `${path}.${key}`, depth + 1);
-      }
-    });
-    
-    return result;
+    processObject(obj);
+    return variantIds;
   };
   
   // Maps variant IDs to their positions in lines of formatted JSON
-  const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, { variantId: string, index: number }> => {
+  const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, string> => {
     if (!obj) return new Map();
     
     const lines = jsonStr.split('\n');
-    const result = new Map<number, { variantId: string, index: number }>();
-    
-    // First, extract all variants and assign an index to each unique variant ID
-    const variantMap = extractVariants(obj);
+    const result = new Map<number, string>();
     
     // Function to annotate lines with variant information
     const processObject = (obj: any, path: string[] = []) => {
@@ -85,12 +98,8 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             const line = lines[i];
             if (line.includes(fieldPattern)) {
               // Check if this is the correct instance by looking at indentation and path context
-              // This is a simplified check - in a real app, more sophisticated parsing might be needed
               if (isFieldAtCurrentPath(line, i, lines, fieldPath)) {
-                result.set(i, { 
-                  variantId: variantId as string,
-                  index: variantMap.get(variantId as string) || 0
-                });
+                result.set(i, variantId as string);
               }
             }
           }
@@ -112,7 +121,6 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   // Helper function to check if a line refers to the field at the current path
   const isFieldAtCurrentPath = (line: string, lineIndex: number, allLines: string[], fieldPath: string[]): boolean => {
     // This is a simplified way to check; it works in many cases but isn't foolproof
-    // For a full JSON parser, you might need a more sophisticated approach
     
     // Check if the line has the correct indentation level
     const indentation = line.match(/^\s*/)?.[0].length || 0;
@@ -126,9 +134,6 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   
   // Generate the line highlighting data
   const lineHighlights = data ? mapVariantsToLines(formattedJson, data) : new Map();
-  
-  // Extract variant map for consistent coloring
-  const variantMap = data ? extractVariants(data) : new Map();
 
   return (
     <Card className="h-full flex flex-col">
@@ -161,13 +166,12 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                 <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
                   {tokens.map((line, i) => {
                     // Check if this line needs highlighting
-                    const variantInfo = lineHighlights.get(i);
+                    const variantId = lineHighlights.get(i);
                     let lineStyle = {};
                     
-                    if (variantInfo) {
-                      const { variantId } = variantInfo;
-                      // Get consistent color based on variant ID
-                      const { background, border } = getVariantColor(variantId, variantMap);
+                    if (variantId) {
+                      // Get consistent color based on variant ID hash
+                      const { background, border } = getVariantColor(variantId);
                       lineStyle = { 
                         backgroundColor: background,
                         borderLeft: `3px solid ${border}`,
