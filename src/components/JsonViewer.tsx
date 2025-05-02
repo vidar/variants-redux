@@ -12,7 +12,7 @@ interface JsonViewerProps {
 }
 
 // Function to get variant color similar to the one in CurlVisualizer
-const getVariantColor = (index: number): { background: string, border: string } => {
+const getVariantColor = (variantId: string, variantMap: Map<string, number>): { background: string, border: string } => {
   const colors = [
     { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" }, // blue
     { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },   // green
@@ -22,6 +22,8 @@ const getVariantColor = (index: number): { background: string, border: string } 
     { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
   ];
   
+  // Get consistent index for this variant ID
+  const index = variantMap.get(variantId) || 0;
   return colors[index % colors.length];
 };
 
@@ -124,6 +126,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   
   // Generate the line highlighting data
   const lineHighlights = data ? mapVariantsToLines(formattedJson, data) : new Map();
+  
+  // Extract variant map for consistent coloring
+  const variantMap = data ? extractVariants(data) : new Map();
 
   return (
     <Card className="h-full flex flex-col">
@@ -160,8 +165,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                     let lineStyle = {};
                     
                     if (variantInfo) {
-                      const { index } = variantInfo;
-                      const { background, border } = getVariantColor(index);
+                      const { variantId } = variantInfo;
+                      // Get consistent color based on variant ID
+                      const { background, border } = getVariantColor(variantId, variantMap);
                       lineStyle = { 
                         backgroundColor: background,
                         borderLeft: `3px solid ${border}`,
