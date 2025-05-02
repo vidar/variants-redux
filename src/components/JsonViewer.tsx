@@ -11,19 +11,18 @@ interface JsonViewerProps {
   error?: string;
 }
 
-// Helper function to generate consistent vibrant colors
-const generateColorFromId = (id: string): string => {
-  // Create a numeric hash from string
-  const hash = Array.from(id).reduce((acc, char) => {
-    return char.charCodeAt(0) + ((acc << 5) - acc);
-  }, 0);
+// Function to get variant color similar to the one in CurlVisualizer
+const getVariantColor = (index: number): { background: string, border: string } => {
+  const colors = [
+    { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" }, // blue
+    { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },   // green
+    { background: "rgba(168, 85, 247, 0.15)", border: "rgba(168, 85, 247, 0.5)" }, // purple
+    { background: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.5)" }, // amber
+    { background: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.5)" }, // pink
+    { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
+  ];
   
-  // Generate HSL with high saturation and appropriate lightness for good contrast
-  const h = Math.abs(hash) % 360;
-  const s = 65 + (Math.abs(hash) % 20); // 65-85% saturation
-  const l = 75 + (Math.abs(hash) % 10); // 75-85% lightness for background
-  
-  return `hsla(${h}, ${s}%, ${l}%, 0.35)`;
+  return colors[index % colors.length];
 };
 
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
@@ -34,71 +33,97 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   // Format JSON as a string with proper indentation
   const formattedJson = data ? JSON.stringify(data, null, 2) : "";
   
-  // Function to find all variants and their corresponding paths in the JSON
-  const findVariantsInJson = (obj: any, result: Map<string, string> = new Map(), path: string[] = []): Map<string, string> => {
+  // Function to extract all variants from the JSON structure at any level
+  const extractVariants = (obj: any, result: Map<string, number> = new Map(), path: string = '', depth: number = 0): Map<string, number> => {
     if (!obj || typeof obj !== 'object') return result;
     
-    // Check if this object has _applied_variants
+    // If this object has _applied_variants, handle it
     if (obj._applied_variants && typeof obj._applied_variants === 'object') {
-      // For each applied variant, store its path and variant ID
       Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
-        const fieldPath = [...path, field].join('.');
-        result.set(fieldPath, variantId as string);
+        if (!result.has(variantId as string)) {
+          // Assign a unique index to each unique variant ID
+          result.set(variantId as string, result.size);
+        }
       });
     }
     
-    // Recursively process all keys
+    // Recursively process all nested objects
     Object.entries(obj).forEach(([key, value]) => {
       if (value && typeof value === 'object') {
-        findVariantsInJson(value, result, [...path, key]);
+        extractVariants(value, result, `${path}.${key}`, depth + 1);
       }
     });
     
     return result;
   };
   
-  // Find line numbers in formatted JSON for a given field path
-  const findLineNumbersForPath = (json: string, pathToFind: string): number[] => {
-    const lines = json.split('\n');
-    const result: number[] = [];
+  // Maps variant IDs to their positions in lines of formatted JSON
+  const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, { variantId: string, index: number }> => {
+    if (!obj) return new Map();
     
-    // Convert path parts to a regex pattern that will match the field name
-    const pathParts = pathToFind.split('.');
-    const fieldName = pathParts[pathParts.length - 1];
+    const lines = jsonStr.split('\n');
+    const result = new Map<number, { variantId: string, index: number }>();
     
-    // Search for the field pattern in each line
-    lines.forEach((line, index) => {
-      // Look for "fieldName": pattern with proper indentation
-      if (line.includes(`"${fieldName}"`)) {
-        // Verify this is the correct level of nesting by checking indentation
-        // This is a simplified check - in a real app you might need more sophisticated parsing
-        result.push(index);
+    // First, extract all variants and assign an index to each unique variant ID
+    const variantMap = extractVariants(obj);
+    
+    // Function to annotate lines with variant information
+    const processObject = (obj: any, path: string[] = []) => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // If this object has _applied_variants, mark the relevant lines
+      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
+        Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
+          // Find the line that contains this field
+          const fieldPath = [...path, field];
+          const fieldPattern = `"${field}"`;
+          
+          // Look for the pattern in all lines
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes(fieldPattern)) {
+              // Check if this is the correct instance by looking at indentation and path context
+              // This is a simplified check - in a real app, more sophisticated parsing might be needed
+              if (isFieldAtCurrentPath(line, i, lines, fieldPath)) {
+                result.set(i, { 
+                  variantId: variantId as string,
+                  index: variantMap.get(variantId as string) || 0
+                });
+              }
+            }
+          }
+        });
       }
-    });
-    
-    return result;
-  };
-  
-  // Generate highlights for the formatted JSON
-  const generateHighlights = (): Record<number, string> => {
-    if (!data) return {};
-    
-    const highlights: Record<number, string> = {};
-    const variantPaths = findVariantsInJson(data);
-    
-    // For each variant path, find the corresponding line and add highlighting
-    variantPaths.forEach((variantId, path) => {
-      const lineNumbers = findLineNumbersForPath(formattedJson, path);
-      lineNumbers.forEach(lineNum => {
-        highlights[lineNum] = generateColorFromId(variantId);
+      
+      // Recursively process all nested objects
+      Object.entries(obj).forEach(([key, value]) => {
+        if (value && typeof value === 'object') {
+          processObject(value, [...path, key]);
+        }
       });
-    });
+    };
     
-    return highlights;
+    processObject(obj);
+    return result;
   };
-
-  // Generate the highlights based on variants in the data
-  const lineHighlights = generateHighlights();
+  
+  // Helper function to check if a line refers to the field at the current path
+  const isFieldAtCurrentPath = (line: string, lineIndex: number, allLines: string[], fieldPath: string[]): boolean => {
+    // This is a simplified way to check; it works in many cases but isn't foolproof
+    // For a full JSON parser, you might need a more sophisticated approach
+    
+    // Check if the line has the correct indentation level
+    const indentation = line.match(/^\s*/)?.[0].length || 0;
+    
+    // Get the last element of the path which is the actual field name
+    const fieldName = fieldPath[fieldPath.length - 1];
+    
+    // The field should be at this line
+    return line.trim().startsWith(`"${fieldName}":`);
+  };
+  
+  // Generate the line highlighting data
+  const lineHighlights = data ? mapVariantsToLines(formattedJson, data) : new Map();
 
   return (
     <Card className="h-full flex flex-col">
@@ -131,12 +156,18 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                 <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
                   {tokens.map((line, i) => {
                     // Check if this line needs highlighting
-                    const backgroundColor = lineHighlights[i];
-                    const lineStyle = backgroundColor ? { 
-                      backgroundColor,
-                      borderLeft: `3px solid ${backgroundColor.replace('0.35', '1')}`,
-                      paddingLeft: '0.5rem'
-                    } : {};
+                    const variantInfo = lineHighlights.get(i);
+                    let lineStyle = {};
+                    
+                    if (variantInfo) {
+                      const { index } = variantInfo;
+                      const { background, border } = getVariantColor(index);
+                      lineStyle = { 
+                        backgroundColor: background,
+                        borderLeft: `3px solid ${border}`,
+                        paddingLeft: '0.5rem'
+                      };
+                    }
                     
                     return (
                       <div 
