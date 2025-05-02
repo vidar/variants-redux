@@ -33,6 +33,8 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("Selected variants before submission:", selectedVariants);
+    
     // Construct the API URL following the specified pattern with the added include_applied_variants=true parameter
     const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3&include_applied_variants=true`;
     
@@ -50,6 +52,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     // Add selected variants if any
     if (selectedVariants.length > 0) {
       headers['x-cs-variant-uid'] = selectedVariants.join(',');
+      console.log("Setting variant header:", headers['x-cs-variant-uid']);
     }
     
     onSubmit({

@@ -44,7 +44,18 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
       }
       
       const data = await response.json();
-      setVariantGroups(data.variant_groups || []);
+      console.log("Variant groups data:", data);
+      
+      // Make sure we have valid variant groups with proper IDs
+      const validVariantGroups = (data.variant_groups || []).map(group => ({
+        ...group,
+        variants: (group.variants || []).map(variant => ({
+          ...variant,
+          id: variant.id || variant.uid || `${group.id}-${variant.name}`
+        }))
+      }));
+      
+      setVariantGroups(validVariantGroups);
     } catch (error) {
       console.error('Error fetching variant groups:', error);
       toast({
@@ -58,19 +69,20 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
   };
   
   const handleVariantSelection = (variantId: string) => {
-    // Add debugging to verify we have a valid ID
-    console.log("Handling variant ID:", variantId);
+    // Stringification for safety, to handle any object-like variantId
+    const idString = String(variantId);
+    console.log("Handling variant selection for ID:", idString);
     
-    if (!variantId) {
-      console.error('Empty or invalid variant ID provided');
+    if (!idString || idString === "undefined") {
+      console.error('Invalid or undefined variant ID provided:', variantId);
       return;
     }
     
     setSelectedVariants(prev => {
       // If already selected, remove it
-      if (prev.includes(variantId)) {
-        console.log(`Removing variant from selection: ${variantId}`);
-        return prev.filter(id => id !== variantId);
+      if (prev.includes(idString)) {
+        console.log(`Removing variant from selection: ${idString}`);
+        return prev.filter(id => id !== idString);
       }
       
       // If not selected and we're at the limit, show error
@@ -84,8 +96,8 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
       }
       
       // Add the new variant
-      console.log(`Adding variant to selection: ${variantId}`);
-      return [...prev, variantId];
+      console.log(`Adding variant to selection: ${idString}`);
+      return [...prev, idString];
     });
   };
 
