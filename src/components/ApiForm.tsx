@@ -33,13 +33,29 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Construct the API URL following the specified pattern
+    const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3`;
+    
+    // Prepare headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'api_key': apiKey,
+    };
+    
+    // Add delivery token if available
+    if (deliveryToken) {
+      headers['access_token'] = deliveryToken;
+    }
+    
+    // Add selected variants if any
+    if (selectedVariants.length > 0) {
+      headers['x-cs-variant-uid'] = selectedVariants.join(',');
+    }
+    
     onSubmit({
-      method: 'GET', // Default method
-      url: 'https://api.example.com/users', // Default URL
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_TOKEN_HERE'
-      },
+      method: 'GET',
+      url,
+      headers,
       body: undefined,
       // Auth fields
       cdaHostname,
@@ -89,7 +105,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
           
           <Separator />
           
-          {/* Variants Section - Ensure we're passing the handleVariantSelection function correctly */}
+          {/* Variants Section */}
           <VariantsSection 
             variantGroups={variantGroups}
             selectedVariants={selectedVariants}
