@@ -108,7 +108,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle className="text-xl">Response</CardTitle>
         <div className="flex items-center space-x-2">
@@ -133,9 +133,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="bg-api-bg-json rounded-md overflow-hidden">
-          <pre className="p-4 text-white font-mono text-sm h-[400px] overflow-auto">
+      <CardContent className="pt-0 flex-grow overflow-hidden">
+        <div className="bg-api-bg-json rounded-md h-full overflow-hidden">
+          <pre className="p-4 text-white font-mono text-sm h-full overflow-auto">
             {isLoading && <div className="text-gray-400">Loading...</div>}
             {error && <div className="text-red-400">{error}</div>}
             {!isLoading && !error && data && formatJsonWithVariantHighlighting(data)}
