@@ -57,24 +57,24 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
   };
   
   const handleVariantSelection = useCallback((variantId: string) => {
-    setSelectedVariants(prev => {
+    setSelectedVariants(prevSelected => {
       // If already selected, remove it
-      if (prev.includes(variantId)) {
-        return prev.filter(id => id !== variantId);
+      if (prevSelected.includes(variantId)) {
+        return prevSelected.filter(id => id !== variantId);
       }
       
       // If not selected and we're at the limit, show error and return unchanged
-      if (prev.length >= 3) {
+      if (prevSelected.length >= 3) {
         toast({
           title: "Selection limit reached",
           description: "You can select up to 3 variants only.",
           variant: "destructive",
         });
-        return prev;
+        return prevSelected;
       }
       
       // Otherwise, add the new variant
-      return [...prev, variantId];
+      return [...prevSelected, variantId];
     });
   }, [toast]);
 

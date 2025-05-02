@@ -1,13 +1,12 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { VariantGroup } from "@/types/api";
 
 interface VariantsSectionProps {
   variantGroups: VariantGroup[];
   selectedVariants: string[];
-  handleVariantChange: (variantId: string, checked: boolean) => void;
+  handleVariantChange: (variantId: string) => void;
   fetchVariantGroups: () => void;
   fetchingVariants: boolean;
   apiKey: string;
@@ -69,7 +68,7 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
                         ? 'bg-primary/10 border-primary' 
                         : 'hover:bg-secondary'
                     }`}
-                    onClick={() => handleVariantChange(variant.id, !selectedVariants.includes(variant.id))}
+                    onClick={() => handleVariantChange(variant.id)}
                   >
                     <span className="text-sm">{variant.name}</span>
                   </div>
