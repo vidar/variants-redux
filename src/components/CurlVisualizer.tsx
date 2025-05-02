@@ -10,9 +10,10 @@ interface CurlVisualizerProps {
   url: string;
   headers: Record<string, string>;
   body?: Record<string, any>;
+  selectedVariants?: {id: string, name: string}[];
 }
 
-const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, body }) => {
+const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, body, selectedVariants }) => {
   const [copied, setCopied] = useState(false);
 
   const generateCurl = () => {
@@ -51,6 +52,15 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
 
   return (
     <Card className="mb-6 border-2">
+      {selectedVariants && selectedVariants.length > 0 && (
+        <div className="p-3 bg-gray-50 border-b flex flex-wrap gap-2">
+          {selectedVariants.map((variant) => (
+            <Badge key={variant.id} variant="outline" className="bg-white">
+              {variant.name} <span className="ml-1 text-gray-500">[{variant.id}]</span>
+            </Badge>
+          ))}
+        </div>
+      )}
       <CardContent className="p-0">
         <div className="flex items-center justify-between bg-gray-100 p-3 border-b">
           <div className="flex items-center gap-2">

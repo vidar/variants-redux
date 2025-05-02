@@ -38,13 +38,16 @@ const Index = () => {
     entryUid: '',
     locale: 'en-us'
   });
+  
+  const [selectedVariantDetails, setSelectedVariantDetails] = useState<{id: string, name: string}[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [responseData, setResponseData] = useState<ResponseData>({});
 
-  const handleSubmit = (data: typeof requestConfig) => {
+  const handleSubmit = (data: typeof requestConfig, variantDetails: {id: string, name: string}[]) => {
     setRequestConfig(data);
+    setSelectedVariantDetails(variantDetails);
     setIsLoading(true);
     setError(undefined);
 
@@ -121,6 +124,7 @@ const Index = () => {
           url={requestConfig.url}
           headers={requestConfig.headers}
           body={requestConfig.body}
+          selectedVariants={selectedVariantDetails}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

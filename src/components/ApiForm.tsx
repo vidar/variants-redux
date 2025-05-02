@@ -35,6 +35,19 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     
     console.log("Selected variants before submission:", selectedVariants);
     
+    // Get variant details for display
+    const selectedVariantDetails = selectedVariants.map(variantId => {
+      // Find the variant in variant groups
+      let foundVariant = { id: variantId, name: variantId };
+      variantGroups.forEach(group => {
+        const variant = group.variants.find(v => v.id === variantId);
+        if (variant) {
+          foundVariant = { id: variantId, name: variant.name };
+        }
+      });
+      return foundVariant;
+    });
+    
     // Construct the API URL following the specified pattern with the added include_applied_variants=true parameter
     const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3&include_applied_variants=true`;
     
@@ -70,7 +83,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
       contentType,
       entryUid,
       locale
-    });
+    }, selectedVariantDetails);
   };
 
   return (

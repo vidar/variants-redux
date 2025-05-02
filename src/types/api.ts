@@ -17,7 +17,7 @@ export interface ApiFormData {
 }
 
 export interface ApiFormProps {
-  onSubmit: (data: ApiFormData) => void;
+  onSubmit: (data: ApiFormData, variantDetails: {id: string, name: string}[]) => void;
   isLoading: boolean;
 }
 
