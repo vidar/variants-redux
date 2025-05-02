@@ -22,8 +22,6 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
   apiKey,
   managementToken
 }) => {
-  console.log('Rendering VariantsSection with selectedVariants:', selectedVariants);
-  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -62,27 +60,19 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
             <div key={group.id} className="space-y-2">
               <h4 className="text-sm font-medium">{group.name}</h4>
               <div className="grid grid-cols-2 gap-2">
-                {group.variants.map((variant) => {
-                  const isSelected = selectedVariants.includes(variant.id);
-                  console.log(`Variant ${variant.id} (${variant.name}) selected:`, isSelected);
-                  
-                  return (
-                    <div 
-                      key={variant.id} 
-                      className={`py-2 px-3 border rounded-md cursor-pointer transition-colors ${
-                        isSelected 
-                          ? 'bg-primary/10 border-primary' 
-                          : 'hover:bg-secondary'
-                      }`}
-                      onClick={() => {
-                        console.log('Clicked on variant:', variant.id, variant.name);
-                        handleVariantChange(variant.id);
-                      }}
-                    >
-                      <span className="text-sm">{variant.name}</span>
-                    </div>
-                  );
-                })}
+                {group.variants.map((variant) => (
+                  <div 
+                    key={variant.id} 
+                    className={`py-2 px-3 border rounded-md cursor-pointer transition-colors ${
+                      selectedVariants.includes(variant.id) 
+                        ? 'bg-primary/10 border-primary' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    onClick={() => handleVariantChange(variant.id)}
+                  >
+                    <span className="text-sm">{variant.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { VariantGroup } from '@/types/api';
 import { useToast } from "@/hooks/use-toast";
@@ -56,30 +57,30 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
     }
   };
   
+  // Completely rebuilt variant selection logic
   const handleVariantSelection = (variantId: string) => {
-    console.log('Selecting variant:', variantId);
-    console.log('Current selected:', selectedVariants);
+    console.log('Handling variant selection for:', variantId);
     
-    setSelectedVariants((prevSelected) => {
+    setSelectedVariants(prev => {
       // If already selected, remove it
-      if (prevSelected.includes(variantId)) {
-        console.log('Removing variant:', variantId);
-        return prevSelected.filter(id => id !== variantId);
+      if (prev.includes(variantId)) {
+        console.log('Removing variant from selection:', variantId);
+        return prev.filter(id => id !== variantId);
       }
       
-      // If not selected and we're at the limit, show error and return unchanged
-      if (prevSelected.length >= 3) {
+      // If not selected and we're at the limit, show error
+      if (prev.length >= 3) {
         toast({
           title: "Selection limit reached",
           description: "You can select up to 3 variants only.",
           variant: "destructive",
         });
-        return prevSelected;
+        return prev;
       }
       
-      // Otherwise, add the new variant
-      console.log('Adding variant:', variantId);
-      return [...prevSelected, variantId];
+      // Add the new variant
+      console.log('Adding variant to selection:', variantId);
+      return [...prev, variantId];
     });
   };
 

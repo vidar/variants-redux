@@ -54,8 +54,6 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     });
   };
 
-  console.log('ApiForm rendering with selectedVariants:', selectedVariants);
-
   return (
     <Card className="h-full overflow-auto">
       <CardHeader className="pb-3">
@@ -91,7 +89,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
           
           <Separator />
           
-          {/* Variants Section */}
+          {/* Variants Section - Ensure we're passing the handleVariantSelection function correctly */}
           <VariantsSection 
             variantGroups={variantGroups}
             selectedVariants={selectedVariants}
