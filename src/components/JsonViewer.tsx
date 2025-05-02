@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
+import { Highlight, themes } from "prism-react-renderer";
 
 interface JsonViewerProps {
   data: any;
@@ -14,6 +15,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const handleCopyClick = () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
   };
+
+  // Format JSON as a string with proper indentation
+  const formattedJson = data ? JSON.stringify(data, null, 2) : "";
 
   return (
     <Card className="h-full flex flex-col">
@@ -30,14 +34,34 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       </CardHeader>
       <CardContent className="pt-0 flex-grow overflow-hidden">
         <div className="bg-api-bg-json rounded-md h-full overflow-hidden">
-          <pre className="p-4 text-white font-mono text-sm h-full overflow-auto">
-            {isLoading && <div className="text-gray-400">Loading...</div>}
-            {error && <div className="text-red-400">{error}</div>}
-            {!isLoading && !error && data && JSON.stringify(data, null, 2)}
-            {!isLoading && !error && !data && (
-              <div className="text-gray-400">No response data</div>
-            )}
-          </pre>
+          {isLoading && (
+            <div className="p-4 text-gray-400">Loading...</div>
+          )}
+          {error && (
+            <div className="p-4 text-red-400">{error}</div>
+          )}
+          {!isLoading && !error && data && (
+            <Highlight
+              theme={themes.vsDark}
+              code={formattedJson}
+              language="json"
+            >
+              {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                <pre className="p-4 text-white font-mono text-sm h-full overflow-auto" style={style}>
+                  {tokens.map((line, i) => (
+                    <div key={i} {...getLineProps({ line })}>
+                      {line.map((token, key) => (
+                        <span key={key} {...getTokenProps({ token })} />
+                      ))}
+                    </div>
+                  ))}
+                </pre>
+              )}
+            </Highlight>
+          )}
+          {!isLoading && !error && !data && (
+            <div className="p-4 text-gray-400">No response data</div>
+          )}
         </div>
       </CardContent>
     </Card>
