@@ -30,4 +30,5 @@ export interface VariantGroup {
 export interface Variant {
   id: string;
   name: string;
+  groupName?: string;
 }
