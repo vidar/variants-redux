@@ -50,17 +50,21 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
     }
   };
 
+  // Function to assign colors to variant badges
+  const getVariantColor = (index: number) => {
+    const colors = [
+      "bg-blue-100 text-blue-800 border-blue-300",
+      "bg-green-100 text-green-800 border-green-300",
+      "bg-purple-100 text-purple-800 border-purple-300",
+      "bg-amber-100 text-amber-800 border-amber-300",
+      "bg-pink-100 text-pink-800 border-pink-300",
+      "bg-teal-100 text-teal-800 border-teal-300"
+    ];
+    return colors[index % colors.length];
+  };
+
   return (
     <Card className="mb-6 border-2">
-      {selectedVariants && selectedVariants.length > 0 && (
-        <div className="p-3 bg-gray-50 border-b flex flex-wrap gap-2">
-          {selectedVariants.map((variant) => (
-            <Badge key={variant.id} variant="outline" className="bg-white">
-              {variant.name} <span className="ml-1 text-gray-500">[{variant.id}]</span>
-            </Badge>
-          ))}
-        </div>
-      )}
       <CardContent className="p-0">
         <div className="flex items-center justify-between bg-gray-100 p-3 border-b">
           <div className="flex items-center gap-2">
@@ -91,6 +95,20 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
         <pre className="p-4 bg-api-bg-curl text-white overflow-x-auto text-sm font-jetbrains-mono">
           <code>{generateCurl()}</code>
         </pre>
+        {selectedVariants && selectedVariants.length > 0 && (
+          <div className="p-3 bg-gray-50 border-t flex flex-wrap gap-2">
+            <span className="text-xs font-medium text-gray-500 mr-2 self-center">Applied variants:</span>
+            {selectedVariants.map((variant, index) => (
+              <Badge 
+                key={variant.id} 
+                variant="outline" 
+                className={`${getVariantColor(index)}`}
+              >
+                {variant.name} <span className="ml-1 opacity-75">[{variant.id}]</span>
+              </Badge>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
