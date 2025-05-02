@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 
 interface ContentSectionProps {
   contentType: string;
@@ -20,10 +22,17 @@ const ContentSection: React.FC<ContentSectionProps> = ({
   locale,
   setLocale
 }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
-    <div className="space-y-4">
-      <h3 className="font-medium">Content</h3>
-      <div className="space-y-3">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-4">
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" className="flex w-full justify-between p-0 hover:bg-transparent">
+          <h3 className="font-medium">Content</h3>
+          <span className="text-xs text-gray-500">{isOpen ? 'Hide' : 'Show'}</span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-3">
         <div className="grid grid-cols-1 gap-3">
           <div>
             <Label htmlFor="contentType">Content Type</Label>
@@ -53,8 +62,8 @@ const ContentSection: React.FC<ContentSectionProps> = ({
             />
           </div>
         </div>
-      </div>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 

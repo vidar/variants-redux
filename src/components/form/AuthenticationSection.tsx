@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 
 interface AuthenticationSectionProps {
   cdaHostname: string;
@@ -28,10 +31,19 @@ const AuthenticationSection: React.FC<AuthenticationSectionProps> = ({
   deliveryToken,
   setDeliveryToken
 }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const [showManagementToken, setShowManagementToken] = useState(false);
+  const [showDeliveryToken, setShowDeliveryToken] = useState(false);
+
   return (
-    <div className="space-y-4">
-      <h3 className="font-medium">Authentication</h3>
-      <div className="space-y-3">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-4">
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" className="flex w-full justify-between p-0 hover:bg-transparent">
+          <h3 className="font-medium">Authentication</h3>
+          <span className="text-xs text-gray-500">{isOpen ? 'Hide' : 'Show'}</span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-3">
         <div className="grid grid-cols-1 gap-3">
           <div>
             <Label htmlFor="cdaHostname">CDA</Label>
@@ -62,27 +74,45 @@ const AuthenticationSection: React.FC<AuthenticationSectionProps> = ({
           </div>
           <div>
             <Label htmlFor="managementToken">Management Token</Label>
-            <Input
-              id="managementToken"
-              value={managementToken}
-              onChange={(e) => setManagementToken(e.target.value)}
-              placeholder="Your Management Token"
-              type="password"
-            />
+            <div className="relative">
+              <Input
+                id="managementToken"
+                value={managementToken}
+                onChange={(e) => setManagementToken(e.target.value)}
+                placeholder="Your Management Token"
+                type={showManagementToken ? "text" : "password"}
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowManagementToken(!showManagementToken)}
+              >
+                {showManagementToken ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
           <div>
             <Label htmlFor="deliveryToken">Delivery Token</Label>
-            <Input
-              id="deliveryToken"
-              value={deliveryToken}
-              onChange={(e) => setDeliveryToken(e.target.value)}
-              placeholder="Your Delivery Token"
-              type="password"
-            />
+            <div className="relative">
+              <Input
+                id="deliveryToken"
+                value={deliveryToken}
+                onChange={(e) => setDeliveryToken(e.target.value)}
+                placeholder="Your Delivery Token"
+                type={showDeliveryToken ? "text" : "password"}
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowDeliveryToken(!showDeliveryToken)}
+              >
+                {showDeliveryToken ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
