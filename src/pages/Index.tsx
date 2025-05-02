@@ -14,6 +14,10 @@ interface ResponseData {
     total_pages: number;
   };
   message?: string;
+  entry?: {
+    _applied_variants?: Record<string, string>;
+    [key: string]: any;
+  };
 }
 
 const Index = () => {
@@ -73,33 +77,28 @@ const Index = () => {
       setTimeout(() => {
         setIsLoading(false);
         
-        // For GET requests with missing fields, show demo data
+        // Demo data with _applied_variants to test highlighting
         setResponseData({
-          data: [
-            {
-              id: 1,
-              name: "John Doe",
-              email: "john@example.com",
-              role: "admin",
-              created_at: "2023-05-01T10:30:00Z"
+          entry: {
+            title: "Premium Car Offer",
+            description: "Great deals on luxury vehicles",
+            car_type: "Sedan",
+            price: 50000,
+            buyer_type: "VIP",
+            features: ["Leather seats", "Navigation system", "Sunroof"],
+            details: {
+              engine: "V8",
+              color: "Midnight Blue",
+              year: 2023
             },
-            {
-              id: 2,
-              name: "Jane Smith",
-              email: "jane@example.com",
-              role: "editor",
-              created_at: "2023-06-15T14:22:00Z"
-            },
-            {
-              id: 3,
-              name: "Mike Johnson",
-              email: "mike@example.com",
-              role: "viewer",
-              created_at: "2023-07-20T09:15:00Z"
+            _applied_variants: {
+              "title": "cs2bac219659e6b8f4", 
+              "car_type": "cs457086abd04bcb0a",
+              "buyer_type": "cs2358ede856c404d8"
             }
-          ],
+          },
           meta: {
-            total: 3,
+            total: 1,
             page: 1,
             per_page: 10,
             total_pages: 1

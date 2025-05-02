@@ -44,7 +44,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
     const formatValue = (value: any, key: string = '', parentPath: string = ''): JSX.Element => {
       const path = parentPath ? `${parentPath}.${key}` : key;
       
-      // Find if this field has an applied variant
+      // Check if this exact path has an applied variant
       let variantId: string | undefined;
       let style: React.CSSProperties = {};
       
@@ -89,6 +89,8 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             <div style={{ paddingLeft: '20px' }}>
               {Object.keys(value).map((objKey, index) => {
                 const keyPath = path ? `${path}.${objKey}` : objKey;
+                
+                // Check if this exact key path has a variant
                 const keyStyle = appliedVariants[keyPath] ? {
                   color: getVariantColor(appliedVariants[keyPath]),
                   fontWeight: 'bold'
