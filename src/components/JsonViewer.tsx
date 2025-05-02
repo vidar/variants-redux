@@ -33,23 +33,23 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
         </div>
       </CardHeader>
       <CardContent className="pt-0 flex-grow overflow-hidden">
-        <div className="bg-api-bg-json rounded-md h-full overflow-hidden">
+        <div className="bg-sky-50 rounded-md h-full overflow-hidden border border-sky-100">
           {isLoading && (
-            <div className="p-4 text-gray-400">Loading...</div>
+            <div className="p-4 text-gray-500">Loading...</div>
           )}
           {error && (
-            <div className="p-4 text-red-400">{error}</div>
+            <div className="p-4 text-red-500">{error}</div>
           )}
           {!isLoading && !error && data && (
             <Highlight
-              theme={themes.vsDark}
+              theme={themes.github}
               code={formattedJson}
               language="json"
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className="p-4 text-white font-mono text-sm h-full overflow-auto" style={style}>
+                <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
                   {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line })}>
+                    <div key={i} {...getLineProps({ line })} className="hover:bg-sky-100">
                       {line.map((token, key) => (
                         <span key={key} {...getTokenProps({ token })} />
                       ))}
@@ -60,7 +60,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             </Highlight>
           )}
           {!isLoading && !error && !data && (
-            <div className="p-4 text-gray-400">No response data</div>
+            <div className="p-4 text-gray-500">No response data</div>
           )}
         </div>
       </CardContent>
