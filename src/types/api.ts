@@ -14,6 +14,7 @@ export interface ApiFormData {
   contentType: string;
   entryUid: string;
   locale: string;
+  includeAll: boolean;
 }
 
 export interface ApiFormProps {
