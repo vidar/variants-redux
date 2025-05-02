@@ -33,8 +33,8 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Construct the API URL following the specified pattern
-    const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3`;
+    // Construct the API URL following the specified pattern with the added include_applied_variants=true parameter
+    const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3&include_applied_variants=true`;
     
     // Prepare headers
     const headers: Record<string, string> = {
