@@ -39,13 +39,13 @@ const Index = () => {
     locale: 'en-us'
   });
   
-  const [selectedVariantDetails, setSelectedVariantDetails] = useState<{id: string, name: string}[]>([]);
+  const [selectedVariantDetails, setSelectedVariantDetails] = useState<{id: string, name: string, groupName?: string}[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [responseData, setResponseData] = useState<ResponseData>({});
 
-  const handleSubmit = (data: typeof requestConfig, variantDetails: {id: string, name: string}[]) => {
+  const handleSubmit = (data: typeof requestConfig, variantDetails: {id: string, name: string, groupName?: string}[]) => {
     setRequestConfig(data);
     setSelectedVariantDetails(variantDetails);
     setIsLoading(true);

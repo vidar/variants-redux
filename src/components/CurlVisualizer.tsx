@@ -10,7 +10,7 @@ interface CurlVisualizerProps {
   url: string;
   headers: Record<string, string>;
   body?: Record<string, any>;
-  selectedVariants?: {id: string, name: string}[];
+  selectedVariants?: {id: string, name: string, groupName?: string}[];
 }
 
 const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, body, selectedVariants }) => {
@@ -104,7 +104,15 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
                 variant="outline" 
                 className={`${getVariantColor(index)}`}
               >
-                {variant.name} <span className="ml-1 opacity-75">[{variant.id}]</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{variant.name}</span>
+                  <div className="flex items-center gap-1">
+                    {variant.groupName && (
+                      <span className="text-[10px] opacity-70">{variant.groupName}</span>
+                    )}
+                    <span className="text-[10px] opacity-75">[{variant.id}]</span>
+                  </div>
+                </div>
               </Badge>
             ))}
           </div>

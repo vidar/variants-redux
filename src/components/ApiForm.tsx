@@ -39,12 +39,18 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     const selectedVariantDetails = selectedVariants.map(variantId => {
       // Find the variant in variant groups
       let foundVariant = { id: variantId, name: variantId };
+      
       variantGroups.forEach(group => {
         const variant = group.variants.find(v => v.id === variantId);
         if (variant) {
-          foundVariant = { id: variantId, name: variant.name };
+          foundVariant = { 
+            id: variantId, 
+            name: variant.name,
+            groupName: group.name  // Include the group name
+          };
         }
       });
+      
       return foundVariant;
     });
     
