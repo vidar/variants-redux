@@ -66,7 +66,9 @@ const Index = () => {
           return response.json();
         })
         .then(data => {
-          setResponseData(data);
+          // Apply variant names to the response data
+          const enhancedData = enhanceResponseWithVariantNames(data, variantDetails);
+          setResponseData(enhancedData);
           setIsLoading(false);
         })
         .catch(error => {
@@ -83,7 +85,7 @@ const Index = () => {
         setIsLoading(false);
         
         // Demo data with _applied_variants to test highlighting
-        setResponseData({
+        const demoData = {
           entry: {
             title: "Premium Car Offer",
             description: "Great deals on luxury vehicles",
@@ -108,9 +110,41 @@ const Index = () => {
             per_page: 10,
             total_pages: 1
           }
-        });
+        };
+        
+        // Enhance the demo data with variant names
+        const enhancedDemoData = enhanceResponseWithVariantNames(demoData, variantDetails);
+        setResponseData(enhancedDemoData);
       }, 1500);
     }
+  };
+  
+  // Function to enhance the response data with variant names
+  const enhanceResponseWithVariantNames = (data: any, variantDetails: {id: string, name: string, groupName?: string}[]) => {
+    // Create a map for quick lookup of variant details by ID
+    const variantMap = new Map(
+      variantDetails.map(variant => [variant.id, variant])
+    );
+    
+    if (data && data.entry && data.entry._applied_variants) {
+      // Create a deep copy to avoid mutation
+      const result = JSON.parse(JSON.stringify(data));
+      
+      // Add _variant_names alongside _applied_variants
+      result.entry._variant_names = {};
+      
+      // For each applied variant, add its name
+      Object.entries(result.entry._applied_variants).forEach(([field, variantId]) => {
+        const variant = variantMap.get(variantId as string);
+        if (variant) {
+          result.entry._variant_names[field] = variant.name;
+        }
+      });
+      
+      return result;
+    }
+    
+    return data;
   };
 
   return (

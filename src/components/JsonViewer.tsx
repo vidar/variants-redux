@@ -39,6 +39,12 @@ const getVariantColor = (variantId: string): { background: string, border: strin
   return variantColors[index];
 };
 
+// Type to store variant info for display
+interface VariantInfo {
+  id: string;
+  name?: string;
+}
+
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const handleCopyClick = () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
@@ -47,33 +53,22 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   // Format JSON as a string with proper indentation
   const formattedJson = data ? JSON.stringify(data, null, 2) : "";
   
-  // Function to extract all variants from the JSON structure at any level
-  const extractVariants = (obj: any): Set<string> => {
-    const variantIds = new Set<string>();
+  // Map to store variant IDs to their names for display
+  const variantInfoMap = new Map<string, VariantInfo>();
+  
+  // Function to extract variant info from the entry data
+  const extractVariantInfo = () => {
+    if (!data || !data.entry || !data.entry._applied_variants) return;
     
-    const processObject = (obj: any) => {
-      if (!obj || typeof obj !== 'object') return;
-      
-      // If this object has _applied_variants, extract the IDs
-      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
-        Object.values(obj._applied_variants).forEach(variantId => {
-          if (typeof variantId === 'string') {
-            variantIds.add(variantId);
-          }
-        });
+    // Extract variant IDs and store in map (initially without names)
+    Object.values(data.entry._applied_variants).forEach((variantId) => {
+      if (typeof variantId === 'string') {
+        variantInfoMap.set(variantId, { id: variantId });
       }
-      
-      // Recursively process all nested objects
-      Object.values(obj).forEach(value => {
-        if (value && typeof value === 'object') {
-          processObject(value);
-        }
-      });
-    };
-    
-    processObject(obj);
-    return variantIds;
+    });
   };
+  
+  extractVariantInfo();
   
   // Maps variant IDs to their positions in lines of formatted JSON
   const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, string> => {
@@ -168,6 +163,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                     // Check if this line needs highlighting
                     const variantId = lineHighlights.get(i);
                     let lineStyle = {};
+                    let variantName = null;
                     
                     if (variantId) {
                       // Get consistent color based on variant ID hash
@@ -175,20 +171,41 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
                       lineStyle = { 
                         backgroundColor: background,
                         borderLeft: `3px solid ${border}`,
-                        paddingLeft: '0.5rem'
+                        paddingLeft: '0.5rem',
+                        position: 'relative'
                       };
+                      
+                      // Get variant name if available
+                      variantName = variantInfoMap.get(variantId)?.name || variantId.substring(0, 10);
                     }
                     
                     return (
                       <div 
                         key={i} 
                         {...getLineProps({ line })} 
-                        className={`hover:bg-sky-100`}
+                        className={`hover:bg-sky-100 relative`}
                         style={lineStyle}
                       >
-                        {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
-                        ))}
+                        <span className="line-content">
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </span>
+                        
+                        {variantId && (
+                          <span 
+                            className="text-xs font-normal text-gray-500 ml-2 inline-block"
+                            style={{ 
+                              position: 'absolute',
+                              right: '10px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                              padding: '0 4px',
+                              borderRadius: '3px'
+                            }}
+                          >
+                            {variantName}
+                          </span>
+                        )}
                       </div>
                     );
                   })}
