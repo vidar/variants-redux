@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { VariantGroup } from "@/types/api";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface VariantsSectionProps {
   variantGroups: VariantGroup[];
@@ -61,23 +60,23 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
             <div key={group.id} className="space-y-2">
               <h4 className="text-sm font-medium">{group.name}</h4>
               <div className="grid grid-cols-2 gap-2">
-                {group.variants.map((variant) => (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    onClick={() => {
-                      console.log(`Variant clicked: ${variant.id}`);
-                      handleVariantChange(variant.id);
-                    }}
-                    className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left ${
-                      selectedVariants.includes(variant.id) 
-                        ? 'bg-primary/10 border-primary' 
-                        : 'hover:bg-secondary'
-                    }`}
-                  >
-                    <span className="text-sm">{variant.name}</span>
-                  </button>
-                ))}
+                {group.variants.map((variant) => {
+                  // Make sure we're using the correct variant ID
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => handleVariantChange(variant.id)}
+                      className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left ${
+                        selectedVariants.includes(variant.id) 
+                          ? 'bg-primary/10 border-primary' 
+                          : 'hover:bg-secondary'
+                      }`}
+                    >
+                      <span className="text-sm">{variant.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}

@@ -58,12 +58,13 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
   };
   
   const handleVariantSelection = (variantId: string) => {
+    // Add debugging to verify we have a valid ID
+    console.log("Handling variant ID:", variantId);
+    
     if (!variantId) {
-      console.error('Invalid variant ID provided');
+      console.error('Empty or invalid variant ID provided');
       return;
     }
-
-    console.log(`Handling variant selection for: ${variantId}`);
     
     setSelectedVariants(prev => {
       // If already selected, remove it
