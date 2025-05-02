@@ -38,6 +38,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
     let appliedVariants: Record<string, any> = {};
     if (obj.entry && obj.entry._applied_variants) {
       appliedVariants = obj.entry._applied_variants;
+      console.log("Found applied variants:", appliedVariants);
     }
     
     const formatValue = (value: any, key: string = '', parentPath: string = ''): JSX.Element => {
@@ -47,9 +48,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       let variantId: string | undefined;
       let style: React.CSSProperties = {};
       
-      // Only apply highlighting if the path exactly matches a key in appliedVariants
       if (appliedVariants && path && appliedVariants[path]) {
         variantId = appliedVariants[path];
+        console.log(`Applying style for path: ${path}, variant: ${variantId}`);
         style = { 
           color: getVariantColor(variantId),
           fontWeight: 'bold'
@@ -86,15 +87,20 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
           <span>
             {'{'}
             <div style={{ paddingLeft: '20px' }}>
-              {Object.keys(value).map((objKey, index) => (
-                <div key={objKey}>
-                  <span style={appliedVariants[path + '.' + objKey] ? { 
-                    color: getVariantColor(appliedVariants[path + '.' + objKey]),
-                    fontWeight: 'bold'
-                  } : {}}>"{objKey}"</span>: {formatValue(value[objKey], objKey, path)}
-                  {index < Object.keys(value).length - 1 && ','}
-                </div>
-              ))}
+              {Object.keys(value).map((objKey, index) => {
+                const keyPath = path ? `${path}.${objKey}` : objKey;
+                const keyStyle = appliedVariants[keyPath] ? {
+                  color: getVariantColor(appliedVariants[keyPath]),
+                  fontWeight: 'bold'
+                } : {};
+                
+                return (
+                  <div key={objKey}>
+                    <span style={keyStyle}>"{objKey}"</span>: {formatValue(value[objKey], objKey, path)}
+                    {index < Object.keys(value).length - 1 && ','}
+                  </div>
+                );
+              })}
             </div>
             {'}'}
           </span>
