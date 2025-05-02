@@ -47,25 +47,13 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       let variantId: string | undefined;
       let style: React.CSSProperties = {};
       
-      // Check if this path is in applied variants (key is field path, value is variant ID)
+      // Only apply highlighting if the path exactly matches a key in appliedVariants
       if (appliedVariants && path && appliedVariants[path]) {
         variantId = appliedVariants[path];
         style = { 
           color: getVariantColor(variantId),
           fontWeight: 'bold'
         };
-      } else {
-        // Check if this is part of a deeper path
-        for (const fieldPath in appliedVariants) {
-          if (fieldPath.startsWith(path + '.') || path.endsWith('.' + fieldPath)) {
-            variantId = appliedVariants[fieldPath];
-            style = { 
-              color: getVariantColor(variantId),
-              fontWeight: 'bold'
-            };
-            break;
-          }
-        }
       }
       
       if (value === null) {
@@ -100,7 +88,10 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             <div style={{ paddingLeft: '20px' }}>
               {Object.keys(value).map((objKey, index) => (
                 <div key={objKey}>
-                  <span style={style}>"{objKey}"</span>: {formatValue(value[objKey], objKey, path)}
+                  <span style={appliedVariants[path + '.' + objKey] ? { 
+                    color: getVariantColor(appliedVariants[path + '.' + objKey]),
+                    fontWeight: 'bold'
+                  } : {}}>"{objKey}"</span>: {formatValue(value[objKey], objKey, path)}
                   {index < Object.keys(value).length - 1 && ','}
                 </div>
               ))}
