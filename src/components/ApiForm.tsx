@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApiFormProps {
   onSubmit: (data: {
@@ -26,7 +28,20 @@ interface ApiFormProps {
   isLoading: boolean;
 }
 
+interface VariantGroup {
+  id: string;
+  name: string;
+  variants: Variant[];
+}
+
+interface Variant {
+  id: string;
+  name: string;
+}
+
 const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
+  const { toast } = useToast();
+  
   // Auth fields
   const [cdaHostname, setCdaHostname] = useState(() => localStorage.getItem('cda_hostname') || 'eu-cdn.contentstack.com');
   const [cmaHostname, setCmaHostname] = useState(() => localStorage.getItem('cma_hostname') || 'eu-api.contentstack.com');
@@ -38,7 +53,12 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
   const [contentType, setContentType] = useState(() => localStorage.getItem('content_type') || '');
   const [entryUid, setEntryUid] = useState(() => localStorage.getItem('entry_uid') || '');
   const [locale, setLocale] = useState(() => localStorage.getItem('locale') || 'en-us');
-
+  
+  // Variant fields
+  const [variantGroups, setVariantGroups] = useState<VariantGroup[]>([]);
+  const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
+  const [fetchingVariants, setFetchingVariants] = useState(false);
+  
   // Save form values to localStorage whenever they change
   useEffect(() => {
     // Auth fields
@@ -62,6 +82,70 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     entryUid,
     locale
   ]);
+  
+  // Effect to fetch variant groups when api key and management token are available
+  useEffect(() => {
+    if (apiKey && managementToken && cmaHostname) {
+      fetchVariantGroups();
+    }
+  }, [apiKey, managementToken, cmaHostname]);
+  
+  const fetchVariantGroups = async () => {
+    if (!apiKey || !managementToken || !cmaHostname) {
+      toast({
+        title: "Missing credentials",
+        description: "API Key and Management Token are required to fetch variant groups.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setFetchingVariants(true);
+    
+    try {
+      const url = `https://${cmaHostname}/v3/variant_groups?include_variant_info=true`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'api_key': apiKey,
+          'authorization': managementToken
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch variant groups: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setVariantGroups(data.variant_groups || []);
+    } catch (error) {
+      console.error('Error fetching variant groups:', error);
+      toast({
+        title: "Error",
+        description: `Failed to fetch variant groups: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
+    } finally {
+      setFetchingVariants(false);
+    }
+  };
+  
+  const handleVariantChange = (variantId: string, checked: boolean) => {
+    if (checked) {
+      if (selectedVariants.length >= 3) {
+        toast({
+          title: "Selection limit reached",
+          description: "You can select up to 3 variants only.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedVariants([...selectedVariants, variantId]);
+    } else {
+      setSelectedVariants(selectedVariants.filter(id => id !== variantId));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,6 +270,70 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
                 </div>
               </div>
             </div>
+          </div>
+          
+          <Separator />
+          
+          {/* Variants Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium">Variants</h3>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={fetchVariantGroups}
+                disabled={fetchingVariants || !apiKey || !managementToken}
+              >
+                {fetchingVariants ? 'Fetching...' : 'Refresh'}
+              </Button>
+            </div>
+            
+            {variantGroups.length === 0 && !fetchingVariants && (
+              <div className="text-sm text-gray-500">
+                {apiKey && managementToken 
+                  ? 'No variant groups found. Click refresh to try again.'
+                  : 'Enter API Key and Management Token to fetch variants.'}
+              </div>
+            )}
+            
+            {fetchingVariants && (
+              <div className="text-sm text-gray-500">
+                Fetching variant groups...
+              </div>
+            )}
+            
+            {variantGroups.length > 0 && (
+              <div className="space-y-4">
+                <div className="text-sm text-gray-500">
+                  Select up to 3 variants
+                </div>
+                {variantGroups.map((group) => (
+                  <div key={group.id} className="space-y-2">
+                    <h4 className="text-sm font-medium">{group.name}</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {group.variants.map((variant) => (
+                        <div key={variant.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`variant-${variant.id}`}
+                            checked={selectedVariants.includes(variant.id)}
+                            onCheckedChange={(checked) => 
+                              handleVariantChange(variant.id, checked === true)
+                            }
+                          />
+                          <Label 
+                            htmlFor={`variant-${variant.id}`}
+                            className="text-sm cursor-pointer"
+                          >
+                            {variant.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button type="submit" disabled={isLoading} className="w-full">
