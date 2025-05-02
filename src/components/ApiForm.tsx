@@ -19,7 +19,8 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     deliveryToken, setDeliveryToken,
     contentType, setContentType,
     entryUid, setEntryUid,
-    locale, setLocale
+    locale, setLocale,
+    includeAll, setIncludeAll
   } = useFormFields();
   
   const {
@@ -54,8 +55,13 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
       return foundVariant;
     });
     
-    // Construct the API URL following the specified pattern with the added include_applied_variants=true parameter
-    const url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_all=true&include_all_depth=3&include_applied_variants=true`;
+    // Construct the API URL with conditional include_all parameters
+    let url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_applied_variants=true`;
+    
+    // Add include_all and include_all_depth parameters if the toggle is on
+    if (includeAll) {
+      url += '&include_all=true&include_all_depth=3';
+    }
     
     // Prepare headers
     const headers: Record<string, string> = {
@@ -123,6 +129,8 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
             setEntryUid={setEntryUid}
             locale={locale}
             setLocale={setLocale}
+            includeAll={includeAll}
+            setIncludeAll={setIncludeAll}
           />
           
           <Separator />

@@ -14,6 +14,7 @@ export const useFormFields = () => {
   const [contentType, setContentType] = useState(() => getLocalStorageItem('content_type'));
   const [entryUid, setEntryUid] = useState(() => getLocalStorageItem('entry_uid'));
   const [locale, setLocale] = useState(() => getLocalStorageItem('locale', 'en-us'));
+  const [includeAll, setIncludeAll] = useState(() => getLocalStorageItem('include_all', 'true') === 'true');
 
   // Save form values to localStorage whenever they change
   useEffect(() => {
@@ -28,6 +29,7 @@ export const useFormFields = () => {
     setLocalStorageItem('content_type', contentType);
     setLocalStorageItem('entry_uid', entryUid);
     setLocalStorageItem('locale', locale);
+    setLocalStorageItem('include_all', includeAll.toString());
   }, [
     cdaHostname, 
     cmaHostname, 
@@ -36,7 +38,8 @@ export const useFormFields = () => {
     deliveryToken,
     contentType,
     entryUid,
-    locale
+    locale,
+    includeAll
   ]);
 
   return {
@@ -58,6 +61,8 @@ export const useFormFields = () => {
     entryUid,
     setEntryUid,
     locale,
-    setLocale
+    setLocale,
+    includeAll,
+    setIncludeAll
   };
 };

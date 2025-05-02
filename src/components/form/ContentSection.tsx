@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 interface ContentSectionProps {
   contentType: string;
@@ -12,6 +13,8 @@ interface ContentSectionProps {
   setEntryUid: (value: string) => void;
   locale: string;
   setLocale: (value: string) => void;
+  includeAll: boolean;
+  setIncludeAll: (value: boolean) => void;
 }
 
 const ContentSection: React.FC<ContentSectionProps> = ({
@@ -20,7 +23,9 @@ const ContentSection: React.FC<ContentSectionProps> = ({
   entryUid,
   setEntryUid,
   locale,
-  setLocale
+  setLocale,
+  includeAll,
+  setIncludeAll
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -59,6 +64,17 @@ const ContentSection: React.FC<ContentSectionProps> = ({
               value={locale}
               onChange={(e) => setLocale(e.target.value)}
               placeholder="en-us"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="includeAll">Include All</Label>
+              <div className="text-xs text-gray-500">Include all referenced content and depth</div>
+            </div>
+            <Switch
+              id="includeAll"
+              checked={includeAll}
+              onCheckedChange={setIncludeAll}
             />
           </div>
         </div>
