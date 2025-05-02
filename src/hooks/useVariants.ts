@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { VariantGroup } from '@/types/api';
 import { useToast } from "@/hooks/use-toast";
 
-export const useVariants = (apiKey: string, managementToken: string, cmaHostname: string) => {
+export const useVariants = (apiKey: string, managementToken: string, cmaHostname: string, onVariantsChange?: (variants: string[]) => void) => {
   const { toast } = useToast();
   const [variantGroups, setVariantGroups] = useState<VariantGroup[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
@@ -15,6 +15,14 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
       fetchVariantGroups();
     }
   }, [apiKey, managementToken, cmaHostname]);
+
+  // Effect to call the onVariantsChange callback when selectedVariants changes
+  useEffect(() => {
+    if (onVariantsChange && selectedVariants) {
+      console.log("Calling onVariantsChange with:", selectedVariants);
+      onVariantsChange(selectedVariants);
+    }
+  }, [selectedVariants, onVariantsChange]);
 
   const fetchVariantGroups = async () => {
     if (!apiKey || !managementToken || !cmaHostname) {
