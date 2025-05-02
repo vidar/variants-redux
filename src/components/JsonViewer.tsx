@@ -21,39 +21,60 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   
   // Find lines that should be highlighted due to applied variants
   const getHighlightedLines = () => {
-    if (!data || !data.entry || !data.entry._applied_variants) return {};
+    if (!data) return {};
     
     const lines = formattedJson.split('\n');
     const highlightedLines: Record<number, string> = {};
-    const appliedVariants = data.entry._applied_variants;
     
-    // Determine what line numbers contain fields that have applied variants
-    let inEntryObject = false;
-    let currentField = '';
-    
-    lines.forEach((line, index) => {
-      // Track when we're inside the entry object
-      if (line.includes('"entry": {')) {
-        inEntryObject = true;
-      } else if (inEntryObject && line.includes('}') && line.trim() === '}') {
-        inEntryObject = false;
+    // Function to recursively process objects looking for _applied_variants
+    const processObject = (obj: any, path: string[] = []) => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // Check if this object has _applied_variants
+      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
+        const currentPath = [...path];
+        const appliedVariants = obj._applied_variants;
+        
+        // For each applied variant, find the corresponding line
+        Object.entries(appliedVariants).forEach(([field, variantId]) => {
+          // Build the complete path to this field
+          const fieldPath = [...currentPath, field].join('.');
+          
+          // Find the line where this field is defined
+          lines.forEach((line, index) => {
+            // Create a pattern that matches this exact field in the JSON
+            // We need to be careful to match the exact field at the correct nesting level
+            let patternString = '';
+            
+            // If we're at the root level, look for the exact field
+            if (currentPath.length === 0) {
+              patternString = `"${field}":\\s`;
+            } else {
+              // For nested fields, look for the field at the end of the current path
+              const lastPathSegment = currentPath[currentPath.length - 1];
+              if (line.includes(lastPathSegment) && line.includes(field)) {
+                patternString = `"${field}":\\s`;
+              }
+            }
+            
+            if (patternString && new RegExp(patternString).test(line)) {
+              // If this field has an applied variant, highlight it
+              highlightedLines[index] = variantId as string;
+            }
+          });
+        });
       }
       
-      // Only look for fields within the entry object
-      if (inEntryObject) {
-        // Check if this line defines a field (has ": " but not within a value)
-        const fieldMatch = line.match(/"([^"]+)":\s/);
-        if (fieldMatch && fieldMatch[1]) {
-          currentField = fieldMatch[1];
-          
-          // If this field has an applied variant, highlight it
-          if (appliedVariants[currentField]) {
-            const variantId = appliedVariants[currentField];
-            highlightedLines[index] = variantId;
-          }
+      // Recursively process nested objects
+      Object.entries(obj).forEach(([key, value]) => {
+        if (value && typeof value === 'object') {
+          processObject(value, [...path, key]);
         }
-      }
-    });
+      });
+    };
+    
+    // Start processing from the root
+    processObject(data);
     
     return highlightedLines;
   };
