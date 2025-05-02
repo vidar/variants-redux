@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { VariantGroup } from '@/types/api';
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,21 +57,23 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
     }
   };
   
-  const handleVariantChange = (variantId: string, checked: boolean) => {
+  const handleVariantChange = useCallback((variantId: string, checked: boolean) => {
     if (checked) {
-      if (selectedVariants.length >= 3) {
-        toast({
-          title: "Selection limit reached",
-          description: "You can select up to 3 variants only.",
-          variant: "destructive",
-        });
-        return;
-      }
-      setSelectedVariants(prev => [...prev, variantId]);
+      setSelectedVariants(prev => {
+        if (prev.length >= 3) {
+          toast({
+            title: "Selection limit reached",
+            description: "You can select up to 3 variants only.",
+            variant: "destructive",
+          });
+          return prev;
+        }
+        return [...prev, variantId];
+      });
     } else {
       setSelectedVariants(prev => prev.filter(id => id !== variantId));
     }
-  };
+  }, [toast]);
 
   return {
     variantGroups,

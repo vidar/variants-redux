@@ -67,9 +67,9 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
                     <Checkbox 
                       id={`variant-${variant.id}`}
                       checked={selectedVariants.includes(variant.id)}
-                      onCheckedChange={(checked) => 
-                        handleVariantChange(variant.id, checked === true)
-                      }
+                      onCheckedChange={(checked) => {
+                        handleVariantChange(variant.id, checked === true);
+                      }}
                     />
                     <Label 
                       htmlFor={`variant-${variant.id}`}
