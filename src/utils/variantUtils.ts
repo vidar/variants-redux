@@ -1,9 +1,9 @@
 
-// Define consistent colors for variants with higher contrast - only red, green, blue
+// Define consistent colors for variants with higher contrast - blue, yellow, red
 export const variantColors = [
-  { background: "rgba(59, 130, 246, 0.25)", border: "rgba(59, 130, 246, 0.7)" },   // blue
-  { background: "rgba(239, 68, 68, 0.25)", border: "rgba(239, 68, 68, 0.7)" },     // red
-  { background: "rgba(34, 197, 94, 0.25)", border: "rgba(34, 197, 94, 0.7)" },     // green
+  { background: "rgba(0, 112, 255, 0.35)", border: "rgba(0, 112, 255, 0.9)" },   // bright blue
+  { background: "rgba(255, 215, 0, 0.35)", border: "rgba(255, 215, 0, 0.9)" },   // bright yellow
+  { background: "rgba(255, 0, 0, 0.35)", border: "rgba(255, 0, 0, 0.9)" },       // bright red
 ];
 
 // Simple hash function to generate a consistent index for a variant ID
@@ -27,9 +27,9 @@ export const getVariantColor = (variantId: string): { background: string, border
 // Function to get a Tailwind CSS class for a variant badge based on variant ID
 export const getVariantColorClass = (variantId: string): string => {
   const colors = [
-    "bg-blue-200 text-blue-800 border-blue-400",    // blue
-    "bg-red-200 text-red-800 border-red-400",       // red
-    "bg-green-200 text-green-800 border-green-400", // green
+    "bg-blue-100 text-blue-900 border-blue-600",    // bright blue
+    "bg-yellow-100 text-yellow-900 border-yellow-600",   // bright yellow
+    "bg-red-100 text-red-900 border-red-600",       // bright red
   ];
   
   // Use the same hashing algorithm for consistency
@@ -40,9 +40,9 @@ export const getVariantColorClass = (variantId: string): string => {
 // Update to maintain the index-based version for backward compatibility
 export const getVariantColorClassByIndex = (index: number): string => {
   const colors = [
-    "bg-blue-200 text-blue-800 border-blue-400",    // blue
-    "bg-red-200 text-red-800 border-red-400",       // red
-    "bg-green-200 text-green-800 border-green-400", // green
+    "bg-blue-100 text-blue-900 border-blue-600",    // bright blue
+    "bg-yellow-100 text-yellow-900 border-yellow-600",   // bright yellow
+    "bg-red-100 text-red-900 border-red-600",       // bright red
   ];
   return colors[index % colors.length];
 };
