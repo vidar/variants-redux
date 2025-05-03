@@ -3,7 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { getVariantColor } from '@/utils/variantUtils';
+import { Highlight, themes } from "prism-react-renderer";
+import { getVariantColor, hashString } from '@/utils/variantUtils';
 
 interface JsonViewerProps {
   data: any;
@@ -16,113 +17,6 @@ interface VariantInfo {
   id: string;
   name?: string;
 }
-
-// Component to render a JSON node
-const JsonNode: React.FC<{
-  name: string | number;
-  value: any;
-  indent: number;
-  path: string;
-  variantId?: string;
-  variantName?: string;
-}> = ({ name, value, indent, path, variantId, variantName }) => {
-  const displayName = typeof name === 'number' ? `[${name}]` : `"${name}"`;
-  const isObject = value !== null && 
-                  (typeof value === 'object' || Array.isArray(value)) &&
-                  Object.keys(value).length > 0;
-  
-  // Determine styling for variant highlighting
-  let nodeStyle = {};
-  if (variantId) {
-    const { background, border } = getVariantColor(variantId);
-    nodeStyle = { 
-      backgroundColor: background,
-      borderLeft: `3px solid ${border}`,
-      paddingLeft: '0.5rem',
-      position: 'relative'
-    };
-  }
-
-  if (isObject) {
-    const isArray = Array.isArray(value);
-    const bracketOpen = isArray ? '[' : '{';
-    const bracketClose = isArray ? ']' : '}';
-    
-    return (
-      <div style={{ ...nodeStyle }}>
-        <div style={{ paddingLeft: `${indent * 20}px` }}>
-          <span>
-            {displayName}: <span className="text-blue-600">{bracketOpen}</span>
-          </span>
-          
-          {variantId && variantName && (
-            <span 
-              className="text-xs font-normal text-gray-500 ml-2 inline-block"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                padding: '0 4px',
-                borderRadius: '3px'
-              }}
-            >
-              {variantName}
-            </span>
-          )}
-        </div>
-        
-        <div>
-          {Object.entries(value).map(([key, val], i) => (
-            <JsonNode 
-              key={`${path}.${key}`}
-              name={isArray ? i : key}
-              value={val}
-              indent={indent + 1}
-              path={`${path}.${key}`}
-            />
-          ))}
-        </div>
-        
-        <div style={{ paddingLeft: `${indent * 20}px` }}>
-          <span className="text-blue-600">{bracketClose}</span>
-        </div>
-      </div>
-    );
-  }
-  
-  // For primitive values
-  return (
-    <div style={{ ...nodeStyle, paddingLeft: `${indent * 20}px` }}>
-      <span>{displayName}: </span>
-      <span className={
-        typeof value === 'string' 
-          ? 'text-green-600' 
-          : typeof value === 'number' 
-          ? 'text-purple-600' 
-          : typeof value === 'boolean' 
-          ? 'text-orange-600' 
-          : 'text-gray-600'
-      }>
-        {typeof value === 'string' 
-          ? `"${value}"`
-          : value === null
-          ? 'null'
-          : String(value)}
-      </span>
-      
-      {variantId && variantName && (
-        <span 
-          className="text-xs font-normal text-gray-500 ml-2 inline-block"
-          style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            padding: '0 4px',
-            borderRadius: '3px'
-          }}
-        >
-          {variantName}
-        </span>
-      )}
-    </div>
-  );
-};
 
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const handleCopyClick = () => {
@@ -143,6 +37,9 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
     
     return displayData;
   };
+
+  // Format JSON as a string with proper indentation (but without _variant_names)
+  const formattedJson = data ? JSON.stringify(getDisplayData(data), null, 2) : "";
   
   // Map to store variant IDs to their names for display
   const variantInfoMap = new Map<string, VariantInfo>();
@@ -171,35 +68,66 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   
   extractVariantInfo();
   
-  // Get variant information for a specific field path
-  const getVariantForField = (path: string[]): { variantId?: string, variantName?: string } => {
-    if (!data?.entry?._applied_variants) return {};
+  // Maps variant IDs to their positions in lines of formatted JSON
+  const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, string> => {
+    if (!obj) return new Map();
     
-    const field = path[path.length - 1];
-    const parentPath = path.slice(0, path.length - 1);
+    const lines = jsonStr.split('\n');
+    const result = new Map<number, string>();
     
-    // Navigate to the parent object
-    let currentObj = data.entry;
-    for (const segment of parentPath) {
-      if (!currentObj || typeof currentObj !== 'object') return {};
-      currentObj = currentObj[segment];
-    }
+    // Function to annotate lines with variant information
+    const processObject = (obj: any, path: string[] = []) => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // If this object has _applied_variants, mark the relevant lines
+      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
+        Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
+          // Find the line that contains this field
+          const fieldPath = [...path, field];
+          const fieldPattern = `"${field}"`;
+          
+          // Look for the pattern in all lines
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes(fieldPattern)) {
+              // Check if this is the correct instance by looking at indentation and path context
+              if (isFieldAtCurrentPath(line, i, lines, fieldPath)) {
+                result.set(i, variantId as string);
+              }
+            }
+          }
+        });
+      }
+      
+      // Recursively process all nested objects
+      Object.entries(obj).forEach(([key, value]) => {
+        if (value && typeof value === 'object') {
+          processObject(value, [...path, key]);
+        }
+      });
+    };
     
-    // Check if this field has a variant applied
-    if (currentObj && currentObj._applied_variants && currentObj._applied_variants[field]) {
-      const variantId = currentObj._applied_variants[field];
-      const variant = variantInfoMap.get(variantId as string);
-      return {
-        variantId: variantId as string,
-        variantName: variant?.name
-      };
-    }
-    
-    return {};
+    processObject(obj);
+    return result;
   };
-
-  const displayData = getDisplayData(data);
   
+  // Helper function to check if a line refers to the field at the current path
+  const isFieldAtCurrentPath = (line: string, lineIndex: number, allLines: string[], fieldPath: string[]): boolean => {
+    // This is a simplified way to check; it works in many cases but isn't foolproof
+    
+    // Check if the line has the correct indentation level
+    const indentation = line.match(/^\s*/)?.[0].length || 0;
+    
+    // Get the last element of the path which is the actual field name
+    const fieldName = fieldPath[fieldPath.length - 1];
+    
+    // The field should be at this line
+    return line.trim().startsWith(`"${fieldName}":`);
+  };
+  
+  // Generate the line highlighting data
+  const lineHighlights = data ? mapVariantsToLines(formattedJson, data) : new Map();
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
@@ -214,22 +142,74 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
         </div>
       </CardHeader>
       <CardContent className="pt-0 flex-grow overflow-hidden">
-        <div className="bg-sky-50 rounded-md h-full overflow-auto border border-sky-100 p-4">
+        <div className="bg-sky-50 rounded-md h-full overflow-hidden border border-sky-100">
           {isLoading && (
             <div className="p-4 text-gray-500">Loading...</div>
           )}
           {error && (
             <div className="p-4 text-red-500">{error}</div>
           )}
-          {!isLoading && !error && displayData && (
-            <div className="font-mono text-sm">
-              <JsonNode 
-                name="root" 
-                value={displayData} 
-                indent={0} 
-                path="root"
-              />
-            </div>
+          {!isLoading && !error && data && (
+            <Highlight
+              theme={themes.github}
+              code={formattedJson}
+              language="json"
+            >
+              {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
+                  {tokens.map((line, i) => {
+                    // Check if this line needs highlighting
+                    const variantId = lineHighlights.get(i);
+                    let lineStyle = {};
+                    let variantName = null;
+                    
+                    if (variantId) {
+                      // Get consistent color based on variant ID
+                      const { background, border } = getVariantColor(variantId);
+                      lineStyle = { 
+                        backgroundColor: background,
+                        borderLeft: `3px solid ${border}`,
+                        paddingLeft: '0.5rem',
+                        position: 'relative'
+                      };
+                      
+                      // Get variant name if available
+                      variantName = variantInfoMap.get(variantId)?.name || variantId.substring(0, 10);
+                    }
+                    
+                    return (
+                      <div 
+                        key={i} 
+                        {...getLineProps({ line })} 
+                        className={`hover:bg-sky-100 relative`}
+                        style={lineStyle}
+                      >
+                        <span className="line-content">
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </span>
+                        
+                        {variantId && (
+                          <span 
+                            className="text-xs font-normal text-gray-500 ml-2 inline-block"
+                            style={{ 
+                              position: 'absolute',
+                              right: '10px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                              padding: '0 4px',
+                              borderRadius: '3px'
+                            }}
+                          >
+                            {variantName}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </pre>
+              )}
+            </Highlight>
           )}
           {!isLoading && !error && !data && (
             <div className="p-4 text-gray-500">No response data</div>
