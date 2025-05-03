@@ -39,7 +39,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     // Get variant details for display
     const selectedVariantDetails = selectedVariants.map(variantId => {
       // Find the variant in variant groups
-      let foundVariant = { id: variantId, name: variantId };
+      let foundVariant: { id: string, name: string, groupName?: string } = { id: variantId, name: variantId };
       
       variantGroups.forEach(group => {
         const variant = group.variants.find(v => v.id === variantId);
@@ -47,7 +47,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
           foundVariant = { 
             id: variantId, 
             name: variant.name,
-            groupName: group.name  // Include the group name
+            groupName: group.name
           };
         }
       });
@@ -94,7 +94,8 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
       // Content fields
       contentType,
       entryUid,
-      locale
+      locale,
+      includeAll
     }, selectedVariantDetails);
   };
 

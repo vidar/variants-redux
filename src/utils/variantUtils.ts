@@ -9,26 +9,42 @@ export const variantColors = [
   { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
 ];
 
+// Simple hash function to generate a consistent index for a variant ID
+export const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Make sure hash is always positive
+  return Math.abs(hash);
+};
+
 // Function to get variant color by hashing the variant ID
 export const getVariantColor = (variantId: string): { background: string, border: string } => {
-  // Simple hash function to generate a consistent index for a variant ID
-  const hashCode = (str: string): number => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    // Make sure hash is always positive
-    return Math.abs(hash);
-  };
-  
-  const index = hashCode(variantId) % variantColors.length;
+  const index = hashString(variantId) % variantColors.length;
   return variantColors[index];
 };
 
-// Function to get a Tailwind CSS class for a variant badge based on index
-export const getVariantColorClass = (index: number): string => {
+// Function to get a Tailwind CSS class for a variant badge based on variant ID
+export const getVariantColorClass = (variantId: string): string => {
+  const colors = [
+    "bg-blue-100 text-blue-800 border-blue-300",
+    "bg-green-100 text-green-800 border-green-300",
+    "bg-purple-100 text-purple-800 border-purple-300",
+    "bg-amber-100 text-amber-800 border-amber-300",
+    "bg-pink-100 text-pink-800 border-pink-300",
+    "bg-teal-100 text-teal-800 border-teal-300"
+  ];
+  
+  // Use the same hashing algorithm for consistency
+  const index = hashString(variantId) % colors.length;
+  return colors[index];
+};
+
+// Update to maintain the index-based version for backward compatibility
+export const getVariantColorClassByIndex = (index: number): string => {
   const colors = [
     "bg-blue-100 text-blue-800 border-blue-300",
     "bg-green-100 text-green-800 border-green-300",

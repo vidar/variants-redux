@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
-import { getVariantColor } from '@/utils/variantUtils';
+import { getVariantColor, hashString } from '@/utils/variantUtils';
 
 interface JsonViewerProps {
   data: any;

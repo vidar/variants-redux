@@ -86,11 +86,11 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
         {selectedVariants && selectedVariants.length > 0 && (
           <div className="p-3 bg-gray-50 border-t flex flex-wrap gap-2">
             <span className="text-xs font-medium text-gray-500 mr-2 self-center">Applied variants:</span>
-            {selectedVariants.map((variant, index) => (
+            {selectedVariants.map((variant) => (
               <Badge 
                 key={variant.id} 
                 variant="outline" 
-                className={`${getVariantColorClass(index)}`}
+                className={`${getVariantColorClass(variant.id)}`}
               >
                 <div className="flex flex-col">
                   <span className="font-medium">{variant.name}</span>
