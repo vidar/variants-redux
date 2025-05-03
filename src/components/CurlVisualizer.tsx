@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
+import { getVariantColorClass } from "@/utils/variantUtils";
 
 interface CurlVisualizerProps {
   method: string;
@@ -50,19 +51,6 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
     }
   };
 
-  // Function to assign colors to variant badges
-  const getVariantColor = (index: number) => {
-    const colors = [
-      "bg-blue-100 text-blue-800 border-blue-300",
-      "bg-green-100 text-green-800 border-green-300",
-      "bg-purple-100 text-purple-800 border-purple-300",
-      "bg-amber-100 text-amber-800 border-amber-300",
-      "bg-pink-100 text-pink-800 border-pink-300",
-      "bg-teal-100 text-teal-800 border-teal-300"
-    ];
-    return colors[index % colors.length];
-  };
-
   return (
     <Card className="mb-6 border-2">
       <CardContent className="p-0">
@@ -102,7 +90,7 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
               <Badge 
                 key={variant.id} 
                 variant="outline" 
-                className={`${getVariantColor(index)}`}
+                className={`${getVariantColorClass(index)}`}
               >
                 <div className="flex flex-col">
                   <span className="font-medium">{variant.name}</span>

@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import CurlVisualizer from '@/components/CurlVisualizer';
 import ApiForm from '@/components/ApiForm';
 import JsonViewer from '@/components/JsonViewer';
 import { ApiFormData } from '@/types/api';
+import { enhanceResponseWithVariantNames } from '@/utils/variantUtils';
 
 // Define the response data type
 interface ResponseData {
@@ -66,7 +66,7 @@ const Index = () => {
           return response.json();
         })
         .then(data => {
-          // Apply variant names to the response data
+          // Apply variant names to the response data using the utility function
           const enhancedData = enhanceResponseWithVariantNames(data, variantDetails);
           setResponseData(enhancedData);
           setIsLoading(false);
@@ -112,41 +112,13 @@ const Index = () => {
           }
         };
         
-        // Enhance the demo data with variant names
+        // Enhance the demo data with variant names using the utility function
         const enhancedDemoData = enhanceResponseWithVariantNames(demoData, variantDetails);
         setResponseData(enhancedDemoData);
       }, 1500);
     }
   };
   
-  // Function to enhance the response data with variant names
-  const enhanceResponseWithVariantNames = (data: any, variantDetails: {id: string, name: string, groupName?: string}[]) => {
-    // Create a map for quick lookup of variant details by ID
-    const variantMap = new Map(
-      variantDetails.map(variant => [variant.id, variant])
-    );
-    
-    if (data && data.entry && data.entry._applied_variants) {
-      // Create a deep copy to avoid mutation
-      const result = JSON.parse(JSON.stringify(data));
-      
-      // Add _variant_names alongside _applied_variants
-      result.entry._variant_names = {};
-      
-      // For each applied variant, add its name
-      Object.entries(result.entry._applied_variants).forEach(([field, variantId]) => {
-        const variant = variantMap.get(variantId as string);
-        if (variant) {
-          result.entry._variant_names[field] = variant.name;
-        }
-      });
-      
-      return result;
-    }
-    
-    return data;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
