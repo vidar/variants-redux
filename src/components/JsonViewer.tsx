@@ -23,8 +23,23 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
   };
 
-  // Format JSON as a string with proper indentation
-  const formattedJson = data ? JSON.stringify(data, null, 2) : "";
+  // Function to remove _variant_names from the data display
+  const getDisplayData = (data: any): any => {
+    if (!data) return data;
+    
+    // Deep copy to avoid mutating original data
+    const displayData = JSON.parse(JSON.stringify(data));
+    
+    // If we have entry with _variant_names, remove it
+    if (displayData && displayData.entry && displayData.entry._variant_names) {
+      delete displayData.entry._variant_names;
+    }
+    
+    return displayData;
+  };
+
+  // Format JSON as a string with proper indentation (but without _variant_names)
+  const formattedJson = data ? JSON.stringify(getDisplayData(data), null, 2) : "";
   
   // Map to store variant IDs to their names for display
   const variantInfoMap = new Map<string, VariantInfo>();
