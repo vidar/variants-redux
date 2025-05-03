@@ -3,8 +3,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { Highlight, themes } from "prism-react-renderer";
-import { getVariantColor, hashString } from '@/utils/variantUtils';
+import JsonHighlighter from './json-viewer/JsonHighlighter';
+import { 
+  getDisplayData, 
+  extractVariantInfo, 
+  mapVariantsToLines, 
+  VariantInfo 
+} from './json-viewer/utils/jsonUtils';
 
 interface JsonViewerProps {
   data: any;
@@ -12,118 +17,16 @@ interface JsonViewerProps {
   error?: string;
 }
 
-// Type to store variant info for display
-interface VariantInfo {
-  id: string;
-  name?: string;
-}
-
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const handleCopyClick = () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-  };
-
-  // Function to remove _variant_names from the data display
-  const getDisplayData = (data: any): any => {
-    if (!data) return data;
-    
-    // Deep copy to avoid mutating original data
-    const displayData = JSON.parse(JSON.stringify(data));
-    
-    // If we have entry with _variant_names, remove it
-    if (displayData && displayData.entry && displayData.entry._variant_names) {
-      delete displayData.entry._variant_names;
-    }
-    
-    return displayData;
   };
 
   // Format JSON as a string with proper indentation (but without _variant_names)
   const formattedJson = data ? JSON.stringify(getDisplayData(data), null, 2) : "";
   
   // Map to store variant IDs to their names for display
-  const variantInfoMap = new Map<string, VariantInfo>();
-  
-  // Function to extract variant info from the entry data
-  const extractVariantInfo = () => {
-    if (!data || !data.entry || !data.entry._applied_variants) return;
-    
-    // Extract variant IDs and names (if available)
-    Object.entries(data.entry._applied_variants).forEach(([field, variantId]) => {
-      if (typeof variantId === 'string') {
-        let name = variantId;
-        
-        // If we have _variant_names, use that for display
-        if (data.entry._variant_names && data.entry._variant_names[field]) {
-          name = data.entry._variant_names[field];
-        }
-        
-        variantInfoMap.set(variantId as string, { 
-          id: variantId as string,
-          name
-        });
-      }
-    });
-  };
-  
-  extractVariantInfo();
-  
-  // Maps variant IDs to their positions in lines of formatted JSON
-  const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, string> => {
-    if (!obj) return new Map();
-    
-    const lines = jsonStr.split('\n');
-    const result = new Map<number, string>();
-    
-    // Function to annotate lines with variant information
-    const processObject = (obj: any, path: string[] = []) => {
-      if (!obj || typeof obj !== 'object') return;
-      
-      // If this object has _applied_variants, mark the relevant lines
-      if (obj._applied_variants && typeof obj._applied_variants === 'object') {
-        Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
-          // Find the line that contains this field
-          const fieldPath = [...path, field];
-          const fieldPattern = `"${field}"`;
-          
-          // Look for the pattern in all lines
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            if (line.includes(fieldPattern)) {
-              // Check if this is the correct instance by looking at indentation and path context
-              if (isFieldAtCurrentPath(line, i, lines, fieldPath)) {
-                result.set(i, variantId as string);
-              }
-            }
-          }
-        });
-      }
-      
-      // Recursively process all nested objects
-      Object.entries(obj).forEach(([key, value]) => {
-        if (value && typeof value === 'object') {
-          processObject(value, [...path, key]);
-        }
-      });
-    };
-    
-    processObject(obj);
-    return result;
-  };
-  
-  // Helper function to check if a line refers to the field at the current path
-  const isFieldAtCurrentPath = (line: string, lineIndex: number, allLines: string[], fieldPath: string[]): boolean => {
-    // This is a simplified way to check; it works in many cases but isn't foolproof
-    
-    // Check if the line has the correct indentation level
-    const indentation = line.match(/^\s*/)?.[0].length || 0;
-    
-    // Get the last element of the path which is the actual field name
-    const fieldName = fieldPath[fieldPath.length - 1];
-    
-    // The field should be at this line
-    return line.trim().startsWith(`"${fieldName}":`);
-  };
+  const variantInfoMap = extractVariantInfo(data);
   
   // Generate the line highlighting data
   const lineHighlights = data ? mapVariantsToLines(formattedJson, data) : new Map();
@@ -150,66 +53,11 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
             <div className="p-4 text-red-500">{error}</div>
           )}
           {!isLoading && !error && data && (
-            <Highlight
-              theme={themes.github}
-              code={formattedJson}
-              language="json"
-            >
-              {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className="p-4 font-mono text-sm h-full overflow-auto bg-sky-50" style={{ color: '#333' }}>
-                  {tokens.map((line, i) => {
-                    // Check if this line needs highlighting
-                    const variantId = lineHighlights.get(i);
-                    let lineStyle = {};
-                    let variantName = null;
-                    
-                    if (variantId) {
-                      // Get consistent color based on variant ID
-                      const { background, border } = getVariantColor(variantId);
-                      lineStyle = { 
-                        backgroundColor: background,
-                        borderLeft: `3px solid ${border}`,
-                        paddingLeft: '0.5rem',
-                        position: 'relative'
-                      };
-                      
-                      // Get variant name if available
-                      variantName = variantInfoMap.get(variantId)?.name || variantId.substring(0, 10);
-                    }
-                    
-                    return (
-                      <div 
-                        key={i} 
-                        {...getLineProps({ line })} 
-                        className={`hover:bg-sky-100 relative`}
-                        style={lineStyle}
-                      >
-                        <span className="line-content">
-                          {line.map((token, key) => (
-                            <span key={key} {...getTokenProps({ token })} />
-                          ))}
-                        </span>
-                        
-                        {variantId && (
-                          <span 
-                            className="text-xs font-normal text-gray-500 ml-2 inline-block"
-                            style={{ 
-                              position: 'absolute',
-                              right: '10px',
-                              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                              padding: '0 4px',
-                              borderRadius: '3px'
-                            }}
-                          >
-                            {variantName}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </pre>
-              )}
-            </Highlight>
+            <JsonHighlighter 
+              formattedJson={formattedJson}
+              lineHighlights={lineHighlights}
+              variantInfoMap={variantInfoMap}
+            />
           )}
           {!isLoading && !error && !data && (
             <div className="p-4 text-gray-500">No response data</div>
