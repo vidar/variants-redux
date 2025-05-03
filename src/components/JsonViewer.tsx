@@ -1,11 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, ChevronDown, ChevronRight } from "lucide-react";
-import { Highlight, themes } from "prism-react-renderer";
-import { getVariantColor, hashString } from '@/utils/variantUtils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Copy } from "lucide-react";
+import { getVariantColor } from '@/utils/variantUtils';
 
 interface JsonViewerProps {
   data: any;
@@ -19,14 +17,7 @@ interface VariantInfo {
   name?: string;
 }
 
-// Helper function to check if a value is an object or array
-const isCollapsible = (value: any): boolean => {
-  return (value !== null && 
-         (typeof value === 'object' || Array.isArray(value)) &&
-         Object.keys(value).length > 0);
-};
-
-// Component to render a collapsible JSON node
+// Component to render a JSON node
 const JsonNode: React.FC<{
   name: string | number;
   value: any;
@@ -35,9 +26,10 @@ const JsonNode: React.FC<{
   variantId?: string;
   variantName?: string;
 }> = ({ name, value, indent, path, variantId, variantName }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const displayName = typeof name === 'number' ? `[${name}]` : `"${name}"`;
-  const isObject = isCollapsible(value);
+  const isObject = value !== null && 
+                  (typeof value === 'object' || Array.isArray(value)) &&
+                  Object.keys(value).length > 0;
   
   // Determine styling for variant highlighting
   let nodeStyle = {};
@@ -53,53 +45,42 @@ const JsonNode: React.FC<{
 
   if (isObject) {
     const isArray = Array.isArray(value);
-    const valueType = isArray ? 'Array' : 'Object';
     const bracketOpen = isArray ? '[' : '{';
     const bracketClose = isArray ? ']' : '}';
-    const itemCount = Object.keys(value).length;
     
     return (
-      <div style={{ ...nodeStyle, paddingLeft: `${indent * 20}px` }} className="relative">
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <div className="flex items-center">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-0 h-5 w-5 mr-1">
-                {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-              </Button>
-            </CollapsibleTrigger>
-            <span>
-              {displayName}: <span className="text-blue-600">{bracketOpen}</span>
-              <span className="text-gray-500 text-xs ml-2">{valueType} ({itemCount} {itemCount === 1 ? 'item' : 'items'})</span>
-            </span>
-            
-            {variantId && variantName && (
-              <span 
-                className="text-xs font-normal text-gray-500 ml-2 inline-block"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                  padding: '0 4px',
-                  borderRadius: '3px'
-                }}
-              >
-                {variantName}
-              </span>
-            )}
-          </div>
+      <div style={{ ...nodeStyle }}>
+        <div style={{ paddingLeft: `${indent * 20}px` }}>
+          <span>
+            {displayName}: <span className="text-blue-600">{bracketOpen}</span>
+          </span>
           
-          <CollapsibleContent>
-            <div>
-              {Object.entries(value).map(([key, val], i) => (
-                <JsonNode 
-                  key={`${path}.${key}`}
-                  name={isArray ? i : key}
-                  value={val}
-                  indent={indent + 1}
-                  path={`${path}.${key}`}
-                />
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+          {variantId && variantName && (
+            <span 
+              className="text-xs font-normal text-gray-500 ml-2 inline-block"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                padding: '0 4px',
+                borderRadius: '3px'
+              }}
+            >
+              {variantName}
+            </span>
+          )}
+        </div>
+        
+        <div>
+          {Object.entries(value).map(([key, val], i) => (
+            <JsonNode 
+              key={`${path}.${key}`}
+              name={isArray ? i : key}
+              value={val}
+              indent={indent + 1}
+              path={`${path}.${key}`}
+            />
+          ))}
+        </div>
+        
         <div style={{ paddingLeft: `${indent * 20}px` }}>
           <span className="text-blue-600">{bracketClose}</span>
         </div>
