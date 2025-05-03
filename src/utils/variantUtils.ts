@@ -1,12 +1,12 @@
 
 // Define consistent colors for variants
 export const variantColors = [
-  { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" }, // blue
-  { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },   // green
-  { background: "rgba(168, 85, 247, 0.15)", border: "rgba(168, 85, 247, 0.5)" }, // purple
-  { background: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.5)" }, // amber
-  { background: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.5)" }, // pink
-  { background: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.5)" }  // teal
+  { background: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.5)" },   // blue
+  { background: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.5)" },     // red
+  { background: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.5)" },     // green
+  { background: "rgba(250, 204, 21, 0.15)", border: "rgba(250, 204, 21, 0.5)" },   // yellow
+  { background: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.5)" },   // pink
+  { background: "rgba(249, 115, 22, 0.15)", border: "rgba(249, 115, 22, 0.5)" }    // orange
 ];
 
 // Simple hash function to generate a consistent index for a variant ID
@@ -30,12 +30,12 @@ export const getVariantColor = (variantId: string): { background: string, border
 // Function to get a Tailwind CSS class for a variant badge based on variant ID
 export const getVariantColorClass = (variantId: string): string => {
   const colors = [
-    "bg-blue-100 text-blue-800 border-blue-300",
-    "bg-green-100 text-green-800 border-green-300",
-    "bg-purple-100 text-purple-800 border-purple-300",
-    "bg-amber-100 text-amber-800 border-amber-300",
-    "bg-pink-100 text-pink-800 border-pink-300",
-    "bg-teal-100 text-teal-800 border-teal-300"
+    "bg-blue-100 text-blue-800 border-blue-300",    // blue
+    "bg-red-100 text-red-800 border-red-300",       // red
+    "bg-green-100 text-green-800 border-green-300", // green
+    "bg-yellow-100 text-yellow-800 border-yellow-300", // yellow
+    "bg-pink-100 text-pink-800 border-pink-300",    // pink
+    "bg-orange-100 text-orange-800 border-orange-300" // orange
   ];
   
   // Use the same hashing algorithm for consistency
@@ -46,12 +46,12 @@ export const getVariantColorClass = (variantId: string): string => {
 // Update to maintain the index-based version for backward compatibility
 export const getVariantColorClassByIndex = (index: number): string => {
   const colors = [
-    "bg-blue-100 text-blue-800 border-blue-300",
-    "bg-green-100 text-green-800 border-green-300",
-    "bg-purple-100 text-purple-800 border-purple-300",
-    "bg-amber-100 text-amber-800 border-amber-300",
-    "bg-pink-100 text-pink-800 border-pink-300",
-    "bg-teal-100 text-teal-800 border-teal-300"
+    "bg-blue-100 text-blue-800 border-blue-300",    // blue
+    "bg-red-100 text-red-800 border-red-300",       // red
+    "bg-green-100 text-green-800 border-green-300", // green
+    "bg-yellow-100 text-yellow-800 border-yellow-300", // yellow
+    "bg-pink-100 text-pink-800 border-pink-300",    // pink
+    "bg-orange-100 text-orange-800 border-orange-300" // orange
   ];
   return colors[index % colors.length];
 };
