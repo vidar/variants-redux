@@ -1,9 +1,16 @@
 
-// Define consistent colors for variants with higher contrast - blue, yellow, red
+// Define consistent colors for variants with much higher contrast
 export const variantColors = [
-  { background: "rgba(0, 112, 255, 0.35)", border: "rgba(0, 112, 255, 0.9)" },   // bright blue
-  { background: "rgba(255, 215, 0, 0.35)", border: "rgba(255, 215, 0, 0.9)" },   // bright yellow
-  { background: "rgba(255, 0, 0, 0.35)", border: "rgba(255, 0, 0, 0.9)" },       // bright red
+  { background: "rgba(0, 89, 255, 0.4)", border: "rgba(0, 89, 255, 1)" },       // bright blue
+  { background: "rgba(255, 217, 0, 0.4)", border: "rgba(255, 217, 0, 1)" },     // bright yellow
+  { background: "rgba(255, 0, 0, 0.4)", border: "rgba(255, 0, 0, 1)" },         // bright red
+  { background: "rgba(0, 128, 0, 0.4)", border: "rgba(0, 128, 0, 1)" },         // green
+  { background: "rgba(0, 128, 128, 0.4)", border: "rgba(0, 128, 128, 1)" },     // teal
+  { background: "rgba(128, 0, 0, 0.4)", border: "rgba(128, 0, 0, 1)" },         // maroon
+  { background: "rgba(255, 102, 0, 0.4)", border: "rgba(255, 102, 0, 1)" },     // orange
+  { background: "rgba(255, 0, 255, 0.4)", border: "rgba(255, 0, 255, 1)" },     // pink
+  { background: "rgba(128, 128, 128, 0.4)", border: "rgba(128, 128, 128, 1)" }, // grey
+  { background: "rgba(47, 79, 79, 0.4)", border: "rgba(47, 79, 79, 1)" }        // darkgrey
 ];
 
 // Simple hash function to generate a consistent index for a variant ID
@@ -27,9 +34,16 @@ export const getVariantColor = (variantId: string): { background: string, border
 // Function to get a Tailwind CSS class for a variant badge based on variant ID
 export const getVariantColorClass = (variantId: string): string => {
   const colors = [
-    "bg-blue-100 text-blue-900 border-blue-600",    // bright blue
-    "bg-yellow-100 text-yellow-900 border-yellow-600",   // bright yellow
-    "bg-red-100 text-red-900 border-red-600",       // bright red
+    "bg-blue-100 text-blue-900 border-blue-700 border-2",       // blue
+    "bg-yellow-100 text-yellow-900 border-yellow-500 border-2", // yellow
+    "bg-red-100 text-red-900 border-red-700 border-2",          // red
+    "bg-green-100 text-green-900 border-green-700 border-2",    // green
+    "bg-teal-100 text-teal-900 border-teal-700 border-2",       // teal
+    "bg-rose-100 text-rose-900 border-rose-900 border-2",       // maroon
+    "bg-orange-100 text-orange-900 border-orange-500 border-2", // orange
+    "bg-pink-100 text-pink-900 border-pink-600 border-2",       // pink
+    "bg-gray-100 text-gray-900 border-gray-500 border-2",       // grey
+    "bg-slate-200 text-slate-900 border-slate-800 border-2",    // darkgrey
   ];
   
   // Use the same hashing algorithm for consistency
@@ -40,9 +54,16 @@ export const getVariantColorClass = (variantId: string): string => {
 // Update to maintain the index-based version for backward compatibility
 export const getVariantColorClassByIndex = (index: number): string => {
   const colors = [
-    "bg-blue-100 text-blue-900 border-blue-600",    // bright blue
-    "bg-yellow-100 text-yellow-900 border-yellow-600",   // bright yellow
-    "bg-red-100 text-red-900 border-red-600",       // bright red
+    "bg-blue-100 text-blue-900 border-blue-700 border-2",       // blue
+    "bg-yellow-100 text-yellow-900 border-yellow-500 border-2", // yellow
+    "bg-red-100 text-red-900 border-red-700 border-2",          // red
+    "bg-green-100 text-green-900 border-green-700 border-2",    // green
+    "bg-teal-100 text-teal-900 border-teal-700 border-2",       // teal
+    "bg-rose-100 text-rose-900 border-rose-900 border-2",       // maroon
+    "bg-orange-100 text-orange-900 border-orange-500 border-2", // orange
+    "bg-pink-100 text-pink-900 border-pink-600 border-2",       // pink
+    "bg-gray-100 text-gray-900 border-gray-500 border-2",       // grey
+    "bg-slate-200 text-slate-900 border-slate-800 border-2",    // darkgrey
   ];
   return colors[index % colors.length];
 };
