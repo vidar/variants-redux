@@ -1,12 +1,9 @@
 
-// Define consistent colors for variants with higher contrast
+// Define consistent colors for variants with higher contrast - only red, green, blue
 export const variantColors = [
   { background: "rgba(59, 130, 246, 0.25)", border: "rgba(59, 130, 246, 0.7)" },   // blue
   { background: "rgba(239, 68, 68, 0.25)", border: "rgba(239, 68, 68, 0.7)" },     // red
   { background: "rgba(34, 197, 94, 0.25)", border: "rgba(34, 197, 94, 0.7)" },     // green
-  { background: "rgba(250, 204, 21, 0.25)", border: "rgba(250, 204, 21, 0.7)" },   // yellow
-  { background: "rgba(236, 72, 153, 0.25)", border: "rgba(236, 72, 153, 0.7)" },   // pink
-  { background: "rgba(249, 115, 22, 0.25)", border: "rgba(249, 115, 22, 0.7)" }    // orange
 ];
 
 // Simple hash function to generate a consistent index for a variant ID
@@ -33,9 +30,6 @@ export const getVariantColorClass = (variantId: string): string => {
     "bg-blue-200 text-blue-800 border-blue-400",    // blue
     "bg-red-200 text-red-800 border-red-400",       // red
     "bg-green-200 text-green-800 border-green-400", // green
-    "bg-yellow-200 text-yellow-800 border-yellow-400", // yellow
-    "bg-pink-200 text-pink-800 border-pink-400",    // pink
-    "bg-orange-200 text-orange-800 border-orange-400" // orange
   ];
   
   // Use the same hashing algorithm for consistency
@@ -49,9 +43,6 @@ export const getVariantColorClassByIndex = (index: number): string => {
     "bg-blue-200 text-blue-800 border-blue-400",    // blue
     "bg-red-200 text-red-800 border-red-400",       // red
     "bg-green-200 text-green-800 border-green-400", // green
-    "bg-yellow-200 text-yellow-800 border-yellow-400", // yellow
-    "bg-pink-200 text-pink-800 border-pink-400",    // pink
-    "bg-orange-200 text-orange-800 border-orange-400" // orange
   ];
   return colors[index % colors.length];
 };
