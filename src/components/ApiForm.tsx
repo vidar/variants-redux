@@ -28,8 +28,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     selectedVariants,
     fetchingVariants,
     fetchVariantGroups,
-    handleVariantSelection,
-    reorderVariants
+    handleVariantSelection
   } = useVariants(apiKey, managementToken, cmaHostname);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -145,7 +144,6 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
             variantGroups={variantGroups}
             selectedVariants={selectedVariants}
             handleVariantChange={handleVariantSelection}
-            reorderVariants={reorderVariants}
             fetchVariantGroups={fetchVariantGroups}
             fetchingVariants={fetchingVariants}
             apiKey={apiKey}

@@ -2,14 +2,11 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { VariantGroup } from "@/types/api";
-import SelectedVariantsSection from './SelectedVariantsSection';
-import AvailableVariantsSection from './AvailableVariantsSection';
 
 interface VariantsSectionProps {
   variantGroups: VariantGroup[];
   selectedVariants: string[];
   handleVariantChange: (variantId: string) => void;
-  reorderVariants: (newOrder: string[]) => void;
   fetchVariantGroups: () => void;
   fetchingVariants: boolean;
   apiKey: string;
@@ -20,7 +17,6 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
   variantGroups,
   selectedVariants,
   handleVariantChange,
-  reorderVariants,
   fetchVariantGroups,
   fetchingVariants,
   apiKey,
@@ -41,17 +37,6 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
         </Button>
       </div>
       
-      {/* Selected variants section */}
-      {selectedVariants.length > 0 && (
-        <SelectedVariantsSection
-          selectedVariants={selectedVariants}
-          variantGroups={variantGroups}
-          onRemoveVariant={handleVariantChange}
-          onReorderVariants={reorderVariants}
-        />
-      )}
-
-      {/* Empty state message */}
       {variantGroups.length === 0 && !fetchingVariants && (
         <div className="text-sm text-gray-500">
           {apiKey && managementToken 
@@ -60,20 +45,47 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
         </div>
       )}
       
-      {/* Loading state */}
       {fetchingVariants && (
         <div className="text-sm text-gray-500">
           Fetching variant groups...
         </div>
       )}
       
-      {/* Available variants for selection */}
       {variantGroups.length > 0 && (
-        <AvailableVariantsSection
-          variantGroups={variantGroups}
-          selectedVariants={selectedVariants}
-          onVariantSelect={handleVariantChange}
-        />
+        <div className="space-y-4">
+          <div className="text-sm text-gray-500">
+            Select up to 3 variants
+          </div>
+          {variantGroups.map((group) => (
+            <div key={group.id} className="space-y-2">
+              <h4 className="text-sm font-medium">{group.name}</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {group.variants.map((variant) => {
+                  const variantId = variant.id;
+                  console.log("Rendering variant with ID:", variantId);
+                  
+                  return (
+                    <button
+                      key={variantId}
+                      type="button"
+                      onClick={() => {
+                        console.log("Button clicked with variant ID:", variantId);
+                        handleVariantChange(variantId);
+                      }}
+                      className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left ${
+                        selectedVariants.includes(variantId) 
+                          ? 'bg-primary/10 border-primary' 
+                          : 'hover:bg-secondary'
+                      }`}
+                    >
+                      <span className="text-sm">{variant.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
