@@ -58,6 +58,9 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     // Construct the API URL with conditional include_all parameters
     let url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_applied_variants=true`;
     
+    // Add locale and include_fallback parameters
+    url += `&locale=${encodeURIComponent(locale)}&include_fallback=true`;
+    
     // Add include_all and include_all_depth parameters if the toggle is on
     if (includeAll) {
       url += '&include_all=true&include_all_depth=3';
