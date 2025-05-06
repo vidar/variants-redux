@@ -8,6 +8,7 @@ import { useFormFields } from "@/hooks/useFormFields";
 import { useVariants } from "@/hooks/useVariants";
 import { useContentTypes } from "@/hooks/useContentTypes";
 import { useEntries } from "@/hooks/useEntries";
+import { useLanguages } from "@/hooks/useLanguages";
 import AuthenticationSection from "./form/AuthenticationSection";
 import ContentSection from "./form/ContentSection";
 import VariantsSection from "./form/VariantsSection";
@@ -46,6 +47,13 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     error: entriesError,
     fetchEntries
   } = useEntries(apiKey, managementToken, cmaHostname, contentType);
+
+  const {
+    languages,
+    isLoading: isLoadingLanguages,
+    error: languagesError,
+    fetchLanguages
+  } = useLanguages(apiKey, managementToken, cmaHostname);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +167,10 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
             isLoadingEntries={isLoadingEntries}
             entriesError={entriesError}
             refreshEntries={fetchEntries}
+            languages={languages}
+            isLoadingLanguages={isLoadingLanguages}
+            languagesError={languagesError}
+            refreshLanguages={fetchLanguages}
           />
           
           <Separator />

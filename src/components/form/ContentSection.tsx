@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContentType } from '@/hooks/useContentTypes';
 import { Entry } from '@/hooks/useEntries';
+import { Language } from '@/hooks/useLanguages';
 import { RefreshCw } from "lucide-react";
 
 interface ContentSectionProps {
@@ -27,6 +28,10 @@ interface ContentSectionProps {
   isLoadingEntries: boolean;
   entriesError: string | null;
   refreshEntries: () => void;
+  languages: Language[];
+  isLoadingLanguages: boolean;
+  languagesError: string | null;
+  refreshLanguages: () => void;
 }
 
 const ContentSection: React.FC<ContentSectionProps> = ({
@@ -45,7 +50,11 @@ const ContentSection: React.FC<ContentSectionProps> = ({
   entries,
   isLoadingEntries,
   entriesError,
-  refreshEntries
+  refreshEntries,
+  languages,
+  isLoadingLanguages,
+  languagesError,
+  refreshLanguages
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -178,13 +187,63 @@ const ContentSection: React.FC<ContentSectionProps> = ({
             )}
           </div>
           <div>
-            <Label htmlFor="locale">Locale</Label>
-            <Input
-              id="locale"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-              placeholder="en-us"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <Label htmlFor="locale">Locale</Label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshLanguages}
+                disabled={isLoadingLanguages}
+                className="h-7 px-2 text-xs"
+              >
+                {isLoadingLanguages ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    Loading...
+                  </>
+                ) : (
+                  'Refresh'
+                )}
+              </Button>
+            </div>
+            {languages.length > 0 ? (
+              <Select value={locale} onValueChange={setLocale}>
+                <SelectTrigger id="locale">
+                  <SelectValue placeholder="Select a locale" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((language) => (
+                    <SelectItem key={language.code} value={language.code}>
+                      {language.name} ({language.code})
+                      {language.fallback_locale && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          → {language.fallback_locale}
+                        </span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="mb-2">
+                <Input
+                  id="locale"
+                  value={locale}
+                  onChange={(e) => setLocale(e.target.value)}
+                  placeholder={isLoadingLanguages ? "Loading locales..." : "e.g., en-us"}
+                  disabled={isLoadingLanguages}
+                />
+                {languagesError && (
+                  <p className="text-xs text-red-500 mt-1">{languagesError}</p>
+                )}
+                {!languagesError && !isLoadingLanguages && languages.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No locales found. Check your API key and management token.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
