@@ -101,11 +101,18 @@ export const useVariants = (apiKey: string, managementToken: string, cmaHostname
     });
   };
 
+  // Function to handle reordering of selected variants
+  const reorderVariants = (newOrder: string[]) => {
+    console.log("Reordering variants to:", newOrder);
+    setSelectedVariants(newOrder);
+  };
+
   return {
     variantGroups,
     selectedVariants,
     fetchingVariants,
     fetchVariantGroups,
-    handleVariantSelection
+    handleVariantSelection,
+    reorderVariants
   };
 };
