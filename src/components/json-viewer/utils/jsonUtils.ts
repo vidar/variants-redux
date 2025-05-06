@@ -8,7 +8,8 @@ export interface VariantInfo {
 }
 
 // Function to remove _variant_names from the data display
-export const getDisplayData = (data: any): any => {
+// and optionally remove publish_details
+export const getDisplayData = (data: any, hidePublishDetails: boolean = false): any => {
   if (!data) return data;
   
   // Deep copy to avoid mutating original data
@@ -17,6 +18,28 @@ export const getDisplayData = (data: any): any => {
   // If we have entry with _variant_names, remove it
   if (displayData && displayData.entry && displayData.entry._variant_names) {
     delete displayData.entry._variant_names;
+  }
+  
+  // If hidePublishDetails is true, remove publish_details from the data
+  if (hidePublishDetails) {
+    const removePublishDetails = (obj: any) => {
+      if (obj && typeof obj === 'object') {
+        // Remove publish_details if it exists
+        if ('publish_details' in obj) {
+          delete obj.publish_details;
+        }
+        
+        // Recurse through all properties
+        for (const key in obj) {
+          if (typeof obj[key] === 'object' && obj[key] !== null) {
+            removePublishDetails(obj[key]);
+          }
+        }
+      }
+      return obj;
+    };
+    
+    removePublishDetails(displayData);
   }
   
   return displayData;
