@@ -79,6 +79,13 @@ interface VariantsSectionProps {
   managementToken: string;
 }
 
+// Define a type for the variant details to fix the TypeScript error
+interface VariantDetails {
+  id: string;
+  name: string;
+  groupName?: string;
+}
+
 const VariantsSection: React.FC<VariantsSectionProps> = ({
   variantGroups,
   selectedVariants,
@@ -90,7 +97,7 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
   managementToken
 }) => {
   // Function to find variant details by id
-  const findVariantDetails = (variantId: string) => {
+  const findVariantDetails = (variantId: string): VariantDetails => {
     for (const group of variantGroups) {
       const variant = group.variants.find(v => v.id === variantId);
       if (variant) {
