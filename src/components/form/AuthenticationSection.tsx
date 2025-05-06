@@ -111,6 +111,29 @@ const AuthenticationSection: React.FC<AuthenticationSectionProps> = ({
             </Select>
           </div>
 
+          {!customRegion && (
+            <>
+              <div>
+                <Label htmlFor="cdaHostname">CDA Hostname</Label>
+                <Input
+                  id="cdaHostname"
+                  value={cdaHostname}
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cmaHostname">CMA Hostname</Label>
+                <Input
+                  id="cmaHostname"
+                  value={cmaHostname}
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+            </>
+          )}
+
           {customRegion && (
             <>
               <div>

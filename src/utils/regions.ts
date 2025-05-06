@@ -30,6 +30,18 @@ export const regions: Region[] = [
     name: 'Azure Europe',
     cda: 'azure-eu-cdn.contentstack.com',
     cma: 'azure-eu-api.contentstack.com'
+  },
+  {
+    id: 'gcp-na',
+    name: 'GCP North America',
+    cda: 'gcp-na-cdn.contentstack.com',
+    cma: 'gcp-na-api.contentstack.com'
+  },
+  {
+    id: 'gcp-eu',
+    name: 'GCP Europe',
+    cda: 'gcp-eu-cdn.contentstack.com',
+    cma: 'gcp-eu-api.contentstack.com'
   }
 ];
 
