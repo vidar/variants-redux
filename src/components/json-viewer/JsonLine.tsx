@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { getVariantColor } from '@/utils/variantUtils';
-import { FlagTriangleRight } from 'lucide-react';
+import { Flag } from 'lucide-react';
+import { getCountryFlagForLocale } from './utils/flagUtils';
 
 interface JsonLineProps {
   line: any[];
@@ -50,6 +51,8 @@ const JsonLine: React.FC<JsonLineProps> = ({
 
   // Check if this line contains a locale key
   const localeValue = getLocaleFromLine(line);
+  // Get appropriate flag image for the locale
+  const flagImage = localeValue ? getCountryFlagForLocale(localeValue) : null;
   
   return (
     <div 
@@ -87,10 +90,21 @@ const JsonLine: React.FC<JsonLineProps> = ({
             right: variantId && variantName ? '100px' : '10px',
             backgroundColor: 'rgba(255, 255, 255, 0.7)',
             padding: '0 4px',
-            borderRadius: '3px'
+            borderRadius: '3px',
+            display: 'flex',
+            alignItems: 'center'
           }}
         >
-          <FlagTriangleRight size={14} className="inline mr-1" />
+          {flagImage ? (
+            <img 
+              src={flagImage} 
+              alt={`${localeValue} flag`} 
+              className="inline mr-1" 
+              style={{ width: '16px', height: '12px' }}
+            />
+          ) : (
+            <Flag size={14} className="inline mr-1" />
+          )}
           {localeValue}
         </span>
       )}
