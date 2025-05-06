@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContentType } from '@/hooks/useContentTypes';
-import { ReloadIcon } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 interface ContentSectionProps {
   contentType: string;
@@ -63,7 +63,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({
               >
                 {isLoadingContentTypes ? (
                   <>
-                    <ReloadIcon className="h-3 w-3 animate-spin mr-1" />
+                    <RefreshCw className="h-3 w-3 animate-spin mr-1" />
                     Loading...
                   </>
                 ) : (
