@@ -62,18 +62,17 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 {group.variants.map((variant) => {
                   const variantId = variant.id;
-                  console.log("Rendering variant with ID:", variantId);
+                  const isSelected = selectedVariants.includes(variantId);
                   
                   return (
                     <button
                       key={variantId}
                       type="button"
                       onClick={() => {
-                        console.log("Button clicked with variant ID:", variantId);
                         handleVariantChange(variantId);
                       }}
                       className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left ${
-                        selectedVariants.includes(variantId) 
+                        isSelected 
                           ? 'bg-primary/10 border-primary' 
                           : 'hover:bg-secondary'
                       }`}

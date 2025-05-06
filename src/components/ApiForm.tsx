@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { ApiFormProps } from "@/types/api";
 import { useFormFields } from "@/hooks/useFormFields";
 import { useVariants } from "@/hooks/useVariants";
+import { useContentTypes } from "@/hooks/useContentTypes";
 import AuthenticationSection from "./form/AuthenticationSection";
 import ContentSection from "./form/ContentSection";
 import VariantsSection from "./form/VariantsSection";
@@ -30,6 +31,13 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     fetchVariantGroups,
     handleVariantSelection
   } = useVariants(apiKey, managementToken, cmaHostname);
+
+  const {
+    contentTypes,
+    isLoading: isLoadingContentTypes,
+    error: contentTypesError,
+    fetchContentTypes
+  } = useContentTypes(apiKey, managementToken, cmaHostname);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +143,10 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
             setLocale={setLocale}
             includeAll={includeAll}
             setIncludeAll={setIncludeAll}
+            contentTypes={contentTypes}
+            isLoadingContentTypes={isLoadingContentTypes}
+            contentTypesError={contentTypesError}
+            refreshContentTypes={fetchContentTypes}
           />
           
           <Separator />
