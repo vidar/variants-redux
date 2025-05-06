@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { regions, Region } from "@/utils/regions";
 
 interface AuthenticationSectionProps {
   cdaHostname: string;
@@ -34,6 +36,53 @@ const AuthenticationSection: React.FC<AuthenticationSectionProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   const [showManagementToken, setShowManagementToken] = useState(false);
   const [showDeliveryToken, setShowDeliveryToken] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [customRegion, setCustomRegion] = useState(false);
+
+  // Initialize the region dropdown based on current CDA/CMA values
+  useEffect(() => {
+    // If we don't have values yet, default to EU
+    if (!cdaHostname && !cmaHostname) {
+      const defaultRegion = regions.find(r => r.id === 'eu');
+      if (defaultRegion) {
+        setCdaHostname(defaultRegion.cda);
+        setCmaHostname(defaultRegion.cma);
+        setSelectedRegion('eu');
+        setCustomRegion(false);
+      }
+      return;
+    }
+    
+    // Check if current hostnames match any predefined region
+    for (const region of regions) {
+      if (region.cda === cdaHostname && region.cma === cmaHostname) {
+        setSelectedRegion(region.id);
+        setCustomRegion(false);
+        return;
+      }
+    }
+    
+    // If no match, it's a custom region
+    setCustomRegion(true);
+    setSelectedRegion('custom');
+  }, []);
+
+  // Handle region change
+  const handleRegionChange = (regionId: string) => {
+    setSelectedRegion(regionId);
+    
+    if (regionId === 'custom') {
+      setCustomRegion(true);
+      return;
+    }
+    
+    setCustomRegion(false);
+    const region = regions.find(r => r.id === regionId);
+    if (region) {
+      setCdaHostname(region.cda);
+      setCmaHostname(region.cma);
+    }
+  };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-4">
@@ -46,23 +95,45 @@ const AuthenticationSection: React.FC<AuthenticationSectionProps> = ({
       <CollapsibleContent className="space-y-3">
         <div className="grid grid-cols-1 gap-3">
           <div>
-            <Label htmlFor="cdaHostname">CDA</Label>
-            <Input
-              id="cdaHostname"
-              value={cdaHostname}
-              onChange={(e) => setCdaHostname(e.target.value)}
-              placeholder="eu-cdn.contentstack.com"
-            />
+            <Label htmlFor="region">Region</Label>
+            <Select value={selectedRegion} onValueChange={handleRegionChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a region" />
+              </SelectTrigger>
+              <SelectContent>
+                {regions.map((region) => (
+                  <SelectItem key={region.id} value={region.id}>
+                    {region.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div>
-            <Label htmlFor="cmaHostname">CMA</Label>
-            <Input
-              id="cmaHostname"
-              value={cmaHostname}
-              onChange={(e) => setCmaHostname(e.target.value)}
-              placeholder="eu-api.contentstack.com"
-            />
-          </div>
+
+          {customRegion && (
+            <>
+              <div>
+                <Label htmlFor="cdaHostname">CDA Hostname</Label>
+                <Input
+                  id="cdaHostname"
+                  value={cdaHostname}
+                  onChange={(e) => setCdaHostname(e.target.value)}
+                  placeholder="eu-cdn.contentstack.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cmaHostname">CMA Hostname</Label>
+                <Input
+                  id="cmaHostname"
+                  value={cmaHostname}
+                  onChange={(e) => setCmaHostname(e.target.value)}
+                  placeholder="eu-api.contentstack.com"
+                />
+              </div>
+            </>
+          )}
+          
           <div>
             <Label htmlFor="apiKey">API Key</Label>
             <Input
