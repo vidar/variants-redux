@@ -1,3 +1,4 @@
+
 export interface ApiFormData {
   method: string;
   url: string;
@@ -17,9 +18,8 @@ export interface ApiFormData {
 }
 
 export interface ApiFormProps {
-  onSubmit: (data: ApiFormData, selectedVariants: {id: string, name: string, groupName?: string}[]) => void;
+  onSubmit: (data: ApiFormData, variantDetails: {id: string, name: string, groupName?: string}[]) => void;
   isLoading: boolean;
-  onVariantSelectionUpdate?: (details: {id: string, name: string, groupName?: string}[]) => void;
 }
 
 export interface VariantGroup {
