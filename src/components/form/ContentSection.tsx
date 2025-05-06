@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContentType } from '@/hooks/useContentTypes';
+import { Entry } from '@/hooks/useEntries';
 import { RefreshCw } from "lucide-react";
 
 interface ContentSectionProps {
@@ -22,6 +23,10 @@ interface ContentSectionProps {
   isLoadingContentTypes: boolean;
   contentTypesError: string | null;
   refreshContentTypes: () => void;
+  entries: Entry[];
+  isLoadingEntries: boolean;
+  entriesError: string | null;
+  refreshEntries: () => void;
 }
 
 const ContentSection: React.FC<ContentSectionProps> = ({
@@ -36,9 +41,18 @@ const ContentSection: React.FC<ContentSectionProps> = ({
   contentTypes,
   isLoadingContentTypes,
   contentTypesError,
-  refreshContentTypes
+  refreshContentTypes,
+  entries,
+  isLoadingEntries,
+  entriesError,
+  refreshEntries
 }) => {
   const [isOpen, setIsOpen] = useState(true);
+
+  // When content type changes, reset entry UID
+  useEffect(() => {
+    setEntryUid('');
+  }, [contentType, setEntryUid]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-4">
@@ -105,13 +119,63 @@ const ContentSection: React.FC<ContentSectionProps> = ({
             )}
           </div>
           <div>
-            <Label htmlFor="entryUid">Entry UID</Label>
-            <Input
-              id="entryUid"
-              value={entryUid}
-              onChange={(e) => setEntryUid(e.target.value)}
-              placeholder="e.g., blt1234567890abcdef"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <Label htmlFor="entryUid">Entry</Label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshEntries}
+                disabled={isLoadingEntries || !contentType}
+                className="h-7 px-2 text-xs"
+              >
+                {isLoadingEntries ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    Loading...
+                  </>
+                ) : (
+                  'Refresh'
+                )}
+              </Button>
+            </div>
+            {entries.length > 0 ? (
+              <Select value={entryUid} onValueChange={setEntryUid}>
+                <SelectTrigger id="entryUid">
+                  <SelectValue placeholder="Select an entry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {entries.map((entry) => (
+                    <SelectItem key={entry.uid} value={entry.uid}>
+                      {entry.title || entry.uid}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="mb-2">
+                <Input
+                  id="entryUid"
+                  value={entryUid}
+                  onChange={(e) => setEntryUid(e.target.value)}
+                  placeholder={isLoadingEntries ? "Loading entries..." : "e.g., blt1234567890abcdef"}
+                  disabled={isLoadingEntries}
+                />
+                {entriesError && (
+                  <p className="text-xs text-red-500 mt-1">{entriesError}</p>
+                )}
+                {!entriesError && !isLoadingEntries && contentType && entries.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No entries found for this content type.
+                  </p>
+                )}
+                {!contentType && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select a content type to load entries.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="locale">Locale</Label>

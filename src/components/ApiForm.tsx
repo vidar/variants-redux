@@ -7,6 +7,7 @@ import { ApiFormProps } from "@/types/api";
 import { useFormFields } from "@/hooks/useFormFields";
 import { useVariants } from "@/hooks/useVariants";
 import { useContentTypes } from "@/hooks/useContentTypes";
+import { useEntries } from "@/hooks/useEntries";
 import AuthenticationSection from "./form/AuthenticationSection";
 import ContentSection from "./form/ContentSection";
 import VariantsSection from "./form/VariantsSection";
@@ -38,6 +39,13 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     error: contentTypesError,
     fetchContentTypes
   } = useContentTypes(apiKey, managementToken, cmaHostname);
+  
+  const {
+    entries,
+    isLoading: isLoadingEntries,
+    error: entriesError,
+    fetchEntries
+  } = useEntries(apiKey, managementToken, cmaHostname, contentType);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +155,10 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
             isLoadingContentTypes={isLoadingContentTypes}
             contentTypesError={contentTypesError}
             refreshContentTypes={fetchContentTypes}
+            entries={entries}
+            isLoadingEntries={isLoadingEntries}
+            entriesError={entriesError}
+            refreshEntries={fetchEntries}
           />
           
           <Separator />
