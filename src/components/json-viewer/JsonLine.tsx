@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { getVariantColor } from '@/utils/variantUtils';
+import { FlagTriangleRight } from 'lucide-react';
 
 interface JsonLineProps {
   line: any[];
@@ -10,6 +11,20 @@ interface JsonLineProps {
   getLineProps: any;
   getTokenProps: any;
 }
+
+// Helper function to determine if a line contains a locale key and its value
+const getLocaleFromLine = (line: any[]): string | null => {
+  // Extract the line content as a string
+  const lineContent = line.map(token => token.content).join('');
+  
+  // Check if this line contains "locale" key with a value
+  const localeMatch = lineContent.match(/"locale"\s*:\s*"([^"]+)"/);
+  if (localeMatch && localeMatch[1]) {
+    return localeMatch[1];
+  }
+  
+  return null;
+};
 
 const JsonLine: React.FC<JsonLineProps> = ({ 
   line, 
@@ -32,6 +47,9 @@ const JsonLine: React.FC<JsonLineProps> = ({
       position: 'relative'
     };
   }
+
+  // Check if this line contains a locale key
+  const localeValue = getLocaleFromLine(line);
   
   return (
     <div 
@@ -58,6 +76,22 @@ const JsonLine: React.FC<JsonLineProps> = ({
           }}
         >
           {variantName}
+        </span>
+      )}
+
+      {localeValue && (
+        <span 
+          className="text-xs font-normal text-gray-500 ml-2 inline-block"
+          style={{ 
+            position: 'absolute',
+            right: variantId && variantName ? '100px' : '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            padding: '0 4px',
+            borderRadius: '3px'
+          }}
+        >
+          <FlagTriangleRight size={14} className="inline mr-1" />
+          {localeValue}
         </span>
       )}
     </div>
