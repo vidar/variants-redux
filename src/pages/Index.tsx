@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import CurlVisualizer from '@/components/CurlVisualizer';
 import ApiForm from '@/components/ApiForm';
@@ -42,14 +43,21 @@ const Index = () => {
   });
   
   const [selectedVariantDetails, setSelectedVariantDetails] = useState<{id: string, name: string, groupName?: string}[]>([]);
+  const [currentVariantDetails, setCurrentVariantDetails] = useState<{id: string, name: string, groupName?: string}[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [responseData, setResponseData] = useState<ResponseData>({});
 
+  // This function updates the current variant details in real-time
+  const handleVariantSelectionUpdate = (details: {id: string, name: string, groupName?: string}[]) => {
+    setCurrentVariantDetails(details);
+  };
+
   const handleSubmit = (data: ApiFormData, variantDetails: {id: string, name: string, groupName?: string}[]) => {
     setRequestConfig(data);
     setSelectedVariantDetails(variantDetails);
+    setCurrentVariantDetails(variantDetails); // Update current variants to match selected ones on submit
     setIsLoading(true);
     setError(undefined);
 
@@ -132,7 +140,7 @@ const Index = () => {
           url={requestConfig.url}
           headers={requestConfig.headers}
           body={requestConfig.body}
-          selectedVariants={selectedVariantDetails}
+          selectedVariants={currentVariantDetails}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -140,6 +148,7 @@ const Index = () => {
             <ApiForm
               onSubmit={handleSubmit}
               isLoading={isLoading}
+              onVariantSelectionUpdate={handleVariantSelectionUpdate}
             />
           </div>
           <div className="lg:col-span-2">

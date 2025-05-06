@@ -10,7 +10,11 @@ import AuthenticationSection from "./form/AuthenticationSection";
 import ContentSection from "./form/ContentSection";
 import VariantsSection from "./form/VariantsSection";
 
-const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
+interface ExtendedApiFormProps extends ApiFormProps {
+  onVariantSelectionUpdate?: (details: {id: string, name: string, groupName?: string}[]) => void;
+}
+
+const ApiForm: React.FC<ExtendedApiFormProps> = ({ onSubmit, isLoading, onVariantSelectionUpdate }) => {
   const {
     cdaHostname, setCdaHostname,
     cmaHostname, setCmaHostname,
@@ -31,13 +35,9 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
     handleVariantSelection
   } = useVariants(apiKey, managementToken, cmaHostname);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    console.log("Selected variants before submission:", selectedVariants);
-    
-    // Get variant details for display
-    const selectedVariantDetails = selectedVariants.map(variantId => {
+  // Get variant details for currently selected variants
+  const getSelectedVariantDetails = () => {
+    return selectedVariants.map(variantId => {
       // Find the variant in variant groups
       let foundVariant: { id: string, name: string, groupName?: string } = { id: variantId, name: variantId };
       
@@ -54,6 +54,29 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
       
       return foundVariant;
     });
+  };
+  
+  // Wrap the handleVariantSelection to also update the curl visualizer
+  const handleVariantChange = (variantId: string) => {
+    handleVariantSelection(variantId);
+    
+    // After a small delay to ensure state has updated
+    setTimeout(() => {
+      if (onVariantSelectionUpdate) {
+        // Get updated variant details after selection change
+        const updatedDetails = getSelectedVariantDetails();
+        onVariantSelectionUpdate(updatedDetails);
+      }
+    }, 50);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log("Selected variants before submission:", selectedVariants);
+    
+    // Get variant details for display
+    const selectedVariantDetails = getSelectedVariantDetails();
     
     // Construct the API URL with conditional include_all parameters
     let url = `https://${cdaHostname}/v3/content_types/${contentType}/entries/${entryUid}?include_applied_variants=true`;
@@ -140,7 +163,7 @@ const ApiForm: React.FC<ApiFormProps> = ({ onSubmit, isLoading }) => {
           <VariantsSection 
             variantGroups={variantGroups}
             selectedVariants={selectedVariants}
-            handleVariantChange={handleVariantSelection}
+            handleVariantChange={handleVariantChange}
             fetchVariantGroups={fetchVariantGroups}
             fetchingVariants={fetchingVariants}
             apiKey={apiKey}
