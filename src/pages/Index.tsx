@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import CurlVisualizer from '@/components/CurlVisualizer';
 import ApiForm from '@/components/ApiForm';
@@ -52,6 +53,7 @@ const Index = () => {
     setSelectedVariantDetails(variantDetails);
     setIsLoading(true);
     setError(undefined);
+    setResponseData({});
 
     // Make actual API call if we have the required fields
     if (data.apiKey && data.contentType && data.entryUid && data.cdaHostname) {
@@ -74,48 +76,13 @@ const Index = () => {
         .catch(error => {
           setError(error.message);
           setIsLoading(false);
-          // Fallback to demo data on error
           setResponseData({
             message: `Error: ${error.message}`
           });
         });
     } else {
-      // Use demo data if essential fields are missing
-      setTimeout(() => {
-        setIsLoading(false);
-        
-        // Demo data with _applied_variants to test highlighting
-        const demoData = {
-          entry: {
-            title: "Premium Car Offer",
-            description: "Great deals on luxury vehicles",
-            car_type: "Sedan",
-            price: 50000,
-            buyer_type: "VIP",
-            features: ["Leather seats", "Navigation system", "Sunroof"],
-            details: {
-              engine: "V8",
-              color: "Midnight Blue",
-              year: 2023
-            },
-            _applied_variants: {
-              "title": "cs2bac219659e6b8f4", 
-              "car_type": "cs457086abd04bcb0a",
-              "buyer_type": "cs2358ede856c404d8"
-            }
-          },
-          meta: {
-            total: 1,
-            page: 1,
-            per_page: 10,
-            total_pages: 1
-          }
-        };
-        
-        // Enhance the demo data with variant names using the utility function
-        const enhancedDemoData = enhanceResponseWithVariantNames(demoData, variantDetails);
-        setResponseData(enhancedDemoData);
-      }, 1500);
+      setIsLoading(false);
+      setError('Missing required fields. Please fill in API Key, Content Type, Entry UID and CDA Hostname to make the request.');
     }
   };
   
