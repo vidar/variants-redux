@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { VariantGroup } from "@/types/api";
 
 interface VariantsSectionProps {
@@ -63,6 +64,7 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
                 {group.variants.map((variant) => {
                   const variantId = variant.id;
                   const isSelected = selectedVariants.includes(variantId);
+                  const selectionOrder = selectedVariants.indexOf(variantId);
                   
                   return (
                     <button
@@ -71,13 +73,22 @@ const VariantsSection: React.FC<VariantsSectionProps> = ({
                       onClick={() => {
                         handleVariantChange(variantId);
                       }}
-                      className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left ${
+                      className={`py-2 px-3 border rounded-md cursor-pointer transition-colors text-left relative ${
                         isSelected 
                           ? 'bg-primary/10 border-primary' 
                           : 'hover:bg-secondary'
                       }`}
                     >
                       <span className="text-sm">{variant.name}</span>
+                      
+                      {isSelected && (
+                        <Badge 
+                          className="absolute top-1 right-1 h-5 w-5 p-0 flex items-center justify-center rounded-full" 
+                          variant="secondary"
+                        >
+                          {selectionOrder + 1}
+                        </Badge>
+                      )}
                     </button>
                   );
                 })}
