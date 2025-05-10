@@ -92,23 +92,32 @@ export const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, strin
   const lines = jsonStr.split('\n');
   const result = new Map<number, string>();
   
-  // Function to annotate lines with variant information
+  // Function to track the path during traversal
   const processObject = (obj: any, path: string[] = []) => {
     if (!obj || typeof obj !== 'object') return;
     
-    // If this object has _applied_variants, mark the relevant lines
+    // Only process _applied_variants at the current level
+    // Do not traverse down for variant coloring from a parent
     if (obj._applied_variants && typeof obj._applied_variants === 'object') {
       Object.entries(obj._applied_variants).forEach(([field, variantId]) => {
-        // Find the line that contains this field
+        // We should only look for fields at the current object level
+        // Find the line that contains this field in the current object context
         const fieldPath = [...path, field];
         const fieldPattern = `"${field}"`;
         
-        // Look for the pattern in all lines
+        // Calculate the expected indentation level for this field
+        // based on the current path depth
+        const expectedIndentLevel = path.length * 2;
+        
+        // Look for the pattern in all lines with correct context
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           if (line.includes(fieldPattern)) {
-            // Check if this is the correct instance by looking at indentation and path context
-            if (isFieldAtCurrentPath(line, i, lines, fieldPath)) {
+            const currentIndent = line.match(/^\s*/)?.[0].length || 0;
+            
+            // Check if this is the correct instance by looking at indentation
+            // Only highlight fields that are at the same object level as the _applied_variants
+            if (Math.abs(currentIndent - expectedIndentLevel) <= 2 && isFieldAtCurrentPath(line, i, lines, fieldPath)) {
               result.set(i, variantId as string);
             }
           }
@@ -116,9 +125,9 @@ export const mapVariantsToLines = (jsonStr: string, obj: any): Map<number, strin
       });
     }
     
-    // Recursively process all nested objects
+    // Recursively process all nested objects, but maintain separate context
     Object.entries(obj).forEach(([key, value]) => {
-      if (value && typeof value === 'object') {
+      if (value && typeof value === 'object' && key !== '_applied_variants') {
         processObject(value, [...path, key]);
       }
     });
