@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, ExternalLink } from "lucide-react";
 import { getVariantColorClass } from "@/utils/variantUtils";
 
 interface CurlVisualizerProps {
@@ -51,6 +51,40 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
     }
   };
 
+  const generatePostmanUrl = () => {
+    // Create a Postman collection object
+    const postmanCollection = {
+      info: {
+        name: `${method} ${url}`,
+        schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      item: [
+        {
+          name: url,
+          request: {
+            method: method,
+            header: Object.entries(headers).map(([key, value]) => ({ key, value })),
+            url: {
+              raw: url,
+              protocol: url.startsWith('https') ? 'https' : 'http',
+              host: url.replace(/^https?:\/\//, '').split('/')[0].split('.'),
+              path: url.replace(/^https?:\/\/[^/]+/, '').split('/').filter(Boolean)
+            },
+            body: body && Object.keys(body).length > 0
+              ? { mode: 'raw', raw: JSON.stringify(body, null, 2), options: { raw: { language: 'json' } } }
+              : undefined
+          }
+        }
+      ]
+    };
+
+    // Encode the collection as a base64 string
+    const encodedCollection = btoa(JSON.stringify(postmanCollection));
+    
+    // Return the Postman import URL
+    return `https://www.postman.com/collections/import?collection=${encodedCollection}`;
+  };
+
   return (
     <Card className="mb-6 border-2">
       <CardContent className="p-0">
@@ -61,24 +95,40 @@ const CurlVisualizer: React.FC<CurlVisualizerProps> = ({ method, url, headers, b
             </Badge>
             <span className="text-sm font-medium">{url}</span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleCopyClick} 
-            className="h-8 px-2 transition-all duration-200 hover:bg-gray-200"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4 mr-1 text-green-500" />
-                <span className="text-green-500 text-xs">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4 mr-1" />
-                <span className="text-xs">Copy</span>
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleCopyClick} 
+              className="h-8 px-2 transition-all duration-200 hover:bg-gray-200"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-1 text-green-500" />
+                  <span className="text-green-500 text-xs">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Copy</span>
+                </>
+              )}
+            </Button>
+            <a 
+              href={generatePostmanUrl()} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 px-2 transition-all duration-200 hover:bg-gray-200"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                <span className="text-xs">Open in Postman</span>
+              </Button>
+            </a>
+          </div>
         </div>
         <pre className="p-4 bg-api-bg-curl text-white overflow-x-auto text-sm font-jetbrains-mono">
           <code>{generateCurl()}</code>
