@@ -20,13 +20,14 @@ interface JsonViewerProps {
 
 const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
   const [hidePublishDetails, setHidePublishDetails] = useState(false);
+  const [hideTimestamps, setHideTimestamps] = useState(false);
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
   };
 
   // Format JSON as a string with proper indentation (but without _variant_names)
-  const formattedJson = data ? JSON.stringify(getDisplayData(data, hidePublishDetails), null, 2) : "";
+  const formattedJson = data ? JSON.stringify(getDisplayData(data, hidePublishDetails, hideTimestamps), null, 2) : "";
   
   // Map to store variant IDs to their names for display
   const variantInfoMap = extractVariantInfo(data);
@@ -39,6 +40,13 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data, isLoading, error }) => {
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle className="text-xl">Response</CardTitle>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Hide timestamps</span>
+            <Switch 
+              checked={hideTimestamps} 
+              onCheckedChange={setHideTimestamps}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Hide publish details</span>
             <Switch 

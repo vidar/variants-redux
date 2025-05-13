@@ -8,8 +8,8 @@ export interface VariantInfo {
 }
 
 // Function to remove _variant_names from the data display
-// and optionally remove publish_details
-export const getDisplayData = (data: any, hidePublishDetails: boolean = false): any => {
+// and optionally remove publish_details and timestamps
+export const getDisplayData = (data: any, hidePublishDetails: boolean = false, hideTimestamps: boolean = false): any => {
   if (!data) return data;
   
   // Deep copy to avoid mutating original data
@@ -40,6 +40,25 @@ export const getDisplayData = (data: any, hidePublishDetails: boolean = false): 
     };
     
     removePublishDetails(displayData);
+  }
+  
+  // If hideTimestamps is true, remove fields that start with created_ or updated_
+  if (hideTimestamps) {
+    const removeTimestamps = (obj: any) => {
+      if (obj && typeof obj === 'object') {
+        // Remove keys that start with created_ or updated_
+        Object.keys(obj).forEach(key => {
+          if (key.startsWith('created_') || key.startsWith('updated_')) {
+            delete obj[key];
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            removeTimestamps(obj[key]);
+          }
+        });
+      }
+      return obj;
+    };
+    
+    removeTimestamps(displayData);
   }
   
   return displayData;
